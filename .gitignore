@@ -100,3 +100,8 @@ upload/
 
 # Download directory (generated screenshots & deliverables — not part of source)
 download/
+
+# Platform scaffolding (not part of Haqqi application code)
+examples/
+tests/
+Caddyfile
