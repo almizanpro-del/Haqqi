@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (Phase 5 — implemented 2026-08-25)
+- **Case Dashboard** — unified overview of active case with deadline countdowns (insurer response / CBJ / statute of limitations) with CRITICAL badges, bad-faith pattern auto-detection from claim log, document checklist progress, drafts summary by status, recent interactions timeline, and quick-link cards to all related views.
+- **Arabic PDF Font Embedding** (PRD §9.2 spike) — embedded DejaVu Sans (165 Arabic glyphs) into jsPDF. PDF size grew from 8KB to 309KB. RTL line reversal + right-alignment. Note: DejaVu Sans lacks Arabic shaping engine — letters render isolated. Production should embed Noto Sans Arabic with a shaping library.
+- **Settings Page** — language selector (AR/EN), role selector (victim/lawyer/admin/regulator), theme info, about card, reset local data, restart onboarding tour.
+
+### Added (Phase 6 — implemented 2026-08-25)
+- **PWA Manifest** (PRD §8) — `public/manifest.json` with name, shortcuts (Intake/Calculator/Dashboard), theme color, RTL direction. App is now installable on mobile/desktop.
+- **Enriched RAG Corpus** (PRD §6.5) — added 7 new legal documents (PDPL-3, CML-12, CPC-118, CIV-267, MACF-7, CML-5, LAB-32). Total corpus: 12 documents (was 5). All verified and searchable.
+- **Mobile Bottom Navigation** — fixed bottom nav for mobile (lg:hidden) with 5 primary items + More button that opens a bottom sheet with all secondary views. Role-aware.
+- **Onboarding Tour** — 6-step dialog that auto-shows on first visit (localStorage flag). Steps: Welcome → AI Intake → Rights Calculator → Drafting Mode → Lawyer Review → Lawyer Directory. Progress dots, Skip/Next/Get started buttons.
+
 ### Added (Phase 3 — implemented 2026-08-25)
 - **Lawyer Directory + Handoff Packets** (PRD §5.2.4) — searchable directory with filters (location, language, fee model, expertise), reviews from verified users, one-click handoff packet (enforces §7.1: only approved drafts can be included).
 - **Engagement Letters** (PRD §5.3.2 + Appendix A) — 4 templates (contingency/hourly × AR/EN), template-filling via API, dual e-signature workflow (client + lawyer) per Electronic Transactions Law.
