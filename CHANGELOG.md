@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (Phase 8 — Audit Gap Closure — 2026-08-25)
+Closed all Critical and Important gaps identified in external review.
+
+**Critical gaps closed**:
+- **Multi-user case access** (C1) — `CaseAccess` model (owner/family_representative/assigned_lawyer/viewer), API for grant/revoke, audit logged. Family members can now manage a case for an injured/deceased relative.
+- **Calendar export (.ics)** (C3) — `GET /api/cases/[id]/deadlines.ics` produces valid iCalendar with all workflow tasks + statute of limitations + CBJ complaint window, with VALARM triggers. 'Export to calendar' button on Dashboard.
+- **Lawyer verification flow** (C4) — `LawyerVerification` model (barId, licenseNumber, licenseFileUrl, lawFirmName, practiceAreas), submit + admin approve/reject workflow. Approval flips `isVerified=true`.
+- **PII redaction before LLM calls** (C5) — `src/lib/pii-redaction.ts` with 8 PII patterns (national_id, phone, email, credit_card, iban, license_plate, passport, dob). Wired into intake + drafting. LLM receives redacted text + notice. PDPL compliance.
+- **Canonical audit log** (C6) — `AuditLog` model (actorId, actorRole, action, entityType, entityId, caseId, metadata, ipAddress, userAgent). `src/lib/audit.ts` with convenience methods. Wired into 10+ actions. `GET /api/audit-logs` with filters.
+
+**Important gaps closed**:
+- **Crisis/distress escalation** (I7) — Enhanced AI intake prompt with distress detection (death, suicide ideation, severe distress). Returns `distressDetected=true` → UI shows rose banner with 911 + 111 (Mental Health Hotline) + 080022022. Pauses legal intake.
+- **Evidence chain-of-custody** (I8) — `EvidenceHash` model with SHA-256 + immutable timestamp. Computed on upload. Audit logged with hash.
+- **Consent versioning** (I9) — `ConsentRecord` model with consentType, version, documentHash (SHA-256 of accepted text). `ConsentGate` modal on first visit requiring 4 consents (terms, privacy, not-legal-advice, data-processing).
+- **In-app notification center** (I10) — `GET /api/notifications/inbox` builds user-facing feed from in_app logs + draft status changes + handoff packets. `InboxView` with severity colors, unread badges.
+- **AI answer feedback** (I11) — `AiFeedback` model (feature, messageId, query, answer, rating, comment). `AiFeedbackButtons` (thumbs up/down) on RAG search results. Quality signal for AI improvement.
+
+**Worth-deciding gaps closed**:
+- **PDPL data subject rights** (W14) — `DataSubjectRequest` model (export/deletion/correction). `PrivacyView` with request form + history + recorded consents + PII protection info.
+- **In-app payment** (W15) — explicitly documented as out of scope per PRD §5.4.
+- **Voice input/output** (W13) — deferred (low priority).
+
+**New models** (7): CaseAccess, LawyerVerification, AuditLog, EvidenceHash, ConsentRecord, AiFeedback, DataSubjectRequest. Total models: 30.
+**New API routes** (9): cases/[id]/access, cases/[id]/deadlines.ics, lawyers/[id]/verification, lawyers/verify, audit-logs, consents, ai-feedback, data-subject-requests, notifications/inbox.
+**New lib modules** (3): pii-redaction.ts, audit.ts, consents.ts.
+**New views** (2): InboxView, PrivacyView.
+**New components** (2): ConsentGate, AiFeedbackButtons.
+
 ### Added (Phase 5 — implemented 2026-08-25)
 - **Case Dashboard** — unified overview of active case with deadline countdowns (insurer response / CBJ / statute of limitations) with CRITICAL badges, bad-faith pattern auto-detection from claim log, document checklist progress, drafts summary by status, recent interactions timeline, and quick-link cards to all related views.
 - **Arabic PDF Font Embedding** (PRD §9.2 spike) — embedded DejaVu Sans (165 Arabic glyphs) into jsPDF. PDF size grew from 8KB to 309KB. RTL line reversal + right-alignment. Note: DejaVu Sans lacks Arabic shaping engine — letters render isolated. Production should embed Noto Sans Arabic with a shaping library.

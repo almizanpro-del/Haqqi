@@ -192,3 +192,23 @@ Work Log:
 Stage Summary:
 - 2 new files (search API, global-search component), 2 modified.
 - Lint clean.
+
+---
+Task ID: phase-8-audit-gaps
+Agent: Super Z (main)
+Task: Close critical audit gaps identified in external review.
+
+Work Log:
+- Audited each gap against codebase; produced status table.
+- Closed all 6 Critical gaps (C1-C6): case access, dashboard (verified), calendar export, lawyer verification, PII redaction, audit log.
+- Closed all 6 Important gaps (I7-I12): distress escalation, chain-of-custody, consent versioning, inbox, AI feedback, moderation (verified).
+- Closed W14 (PDPL data subject rights); deferred W13 (voice); documented W15 (payment out of scope).
+- 7 new Prisma models, 9 new API routes, 3 new lib modules, 2 new views, 2 new components.
+- Browser-verified: PII redaction (2 items detected), distress detection (death + self-harm → support lines offered), consent recording, audit log, .ics export (5KB valid file), inbox feed, privacy view.
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 29 files changed, 16 new files.
+- 30 Prisma models total (was 23).
+- Lint clean.
+- All Critical and Important audit gaps now closed.
