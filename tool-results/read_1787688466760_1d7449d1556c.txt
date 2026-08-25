@@ -1,0 +1,610 @@
+     1→# Product Requirements Document (PRD)
+     2→
+     3→**Haqqi – حقي**
+     4→*Your Rights After a Car Accident in Jordan*
+     5→Version 3.0 – Technical / Development-Ready
+     6→Date: August 25, 2026
+     7→
+     8→---
+     9→
+    10→## Revision Notes (v2.1 → v3.0)
+    11→
+    12→Per your feedback, this version:
+    13→
+    14→1. **Drops the naming/branding question as a blocker.** Noted once, briefly, in Section 1 — the product name is flexible and can be finalized independent of the technical build.
+    15→2. **Folds legal oversight into a concrete product feature instead of a risk section.** You have a lawyer engaged as legal counsel for the platform, so the open question isn't *whether* there's legal sign-off — it's *how the product enforces it*. Section 7 now specifies a full **Lawyer Review & Legal Content Management** workflow: states, roles, database fields, API endpoints, and UI, covering both per-document review (before anything is sent/filed) and ongoing content curation (compensation rules, RAG legal corpus, templates).
+    16→3. **Removes budget and timeline/GTM sections entirely**, as requested. This is a technical and functional spec, not a project plan.
+    17→4. **Expands the Technical Architecture section substantially** — provider-agnostic AI/LLM layer, RAG pipeline detail, API surface, RLS/auth model, PDF/notification architecture — plus a new **Technical Validation Plan** (Section 9) listing the specific things worth prototyping before committing to full-scale development, since that's what you said you actually need right now: validating the idea and the technical tools, not the business plan.
+    18→
+    19→---
+    20→
+    21→## 1. Overview
+    22→
+    23→**Haqqi** (working name — the brand can be finalized independently of this spec; nothing below depends on the final name) is a bilingual (Arabic-first, English-second) AI-assisted platform that helps car-accident victims in Jordan understand their likely legal entitlements, follow a structured claims timeline, organize evidence, recognize bad-faith insurer conduct, generate lawyer-reviewed draft documents (complaint letters, demand letters, court filings), and connect with a vetted lawyer.
+    24→
+    25→**Vision**: No one in Jordan should lose rightful compensation after a car accident due to lack of knowledge, fear, or an unfair claims process.
+    26→
+    27→**Positioning**: a self-help and case-organization tool with a built-in lawyer-review layer — not a substitute for legal representation, and every document that leaves the platform is either explicitly informational or has passed through the Lawyer Review workflow in Section 7.
+    28→
+    29→---
+    30→
+    31→## 2. Problem Statement
+    32→
+    33→| Pain Category | Description |
+    34→| --- | --- |
+    35→| **Information Asymmetry** | Victims don't know their entitlements (medical, disability, death, moral damages), deadlines, or required documents. |
+    36→| **Abusive Claims Handling** | Insurers may delay, deny, lowball, or misstate policy terms. |
+    37→| **Intimidation & Power Imbalance** | Aggressive adjusters or informal actors pressure victims into fast, unfair settlements. |
+    38→| **Informal Claim-Buying** | Third parties buy accident claims at a discount and cash out the difference. |
+    39→| **Weak Recourse Awareness** | A complaint path exists (insurer → CBJ → courts) but is not widely known or easy to use. |
+    40→| **Complex Court Procedures** | Victims don't know how to file a claim or enforce a judgment. |
+    41→
+    42→**Current state**: Jordan has compulsory third-party motor insurance, a Motor Accidents Compensation Fund for uninsured/hit-and-run cases, an insurance-sector consumer-protection function at CBJ, and a civil procedure code governing court claims. **All specific article/regulation numbers referenced anywhere in this document are placeholders pending confirmation by your engaged legal counsel** — see Section 7.4.
+    43→
+    44→---
+    45→
+    46→## 3. Target Users
+    47→
+    48→| Segment | Characteristics | Needs |
+    49→| --- | --- | --- |
+    50→| **Accident Victims** (primary) | Arabic-speaking, often low legal literacy, possibly injured or grieving | Clear rights info, step-by-step guidance, low cognitive load |
+    51→| **Family Members** (primary) | Navigating claims for an injured/deceased relative | Same, plus inheritance/heir guidance |
+    52→| **Vulnerable Groups** (primary) | Refugees, migrants, elderly, low literacy | Simplified language, voice input/output, WhatsApp/SMS |
+    53→| **Lawyers / Legal Aid** (secondary) | Reviewing content, receiving case handoffs | Review queue, organized case files |
+    54→| **Regulators (CBJ, Insurance Commission)** (secondary, Phase 3) | Monitoring market conduct | Aggregated, anonymized data |
+    55→
+    56→---
+    57→
+    58→## 4. Goals & Success Metrics
+    59→
+    60→| Metric | Target | Measurement |
+    61→| --- | --- | --- |
+    62→| Rights Module Completion Rate | 70% | Funnel analytics |
+    63→| Complaint Letter Generation Rate | 40% | Event tracking |
+    64→| Drafting Mode Usage Rate | 35% | Event tracking |
+    65→| Evidence Upload Rate | 50% | Storage metrics |
+    66→| Escalation Rate (CBJ/Lawyer) | 25% | Referral tracking |
+    67→| Lawyer Review Turnaround Time | < 48 hrs | Workflow timestamps (Section 7) |
+    68→| CSAT | 4.5 / 5 | In-app survey |
+    69→| NPS | ≥ 50 | Quarterly survey |
+    70→
+    71→---
+    72→
+    73→## 5. Scope & Features
+    74→
+    75→### 5.1 Phase 1 — Core Self-Help (informational only; nothing generated here is sent externally)
+    76→
+    77→#### 5.1.1 Rights & Entitlements Calculator
+    78→**Functional requirements**
+    79→* Guided Q&A (Arabic default, English toggle): accident type, injuries, death/disability, medical bills, lost income, vehicle damage, other party's insurance status.
+    80→* Output: compensation categories with plain-language legal basis (from the versioned, lawyer-approved rules config — Section 7.2), an estimated JD range with a "not legal advice" disclaimer, and a document checklist per category.
+    81→* Persist results to the user's profile if logged in.
+    82→
+    83→**Technical requirements**
+    84→* Next.js (App Router) + TypeScript. Compensation logic reads from a versioned JSON/YAML config table (`legal_rules_config`, Section 6.2), never hardcoded in application code, so legal counsel can update it via the Legal Content Management UI (Section 7.2) without a deploy.
+    85→
+    86→#### 5.1.2 Step-by-Step Accident Workflow
+    87→**Functional requirements**
+    88→* Auto-generated task timeline (police report, croquis, photos, medical exam, insurer notification, document submission, follow-up), driven by the same `legal_rules_config` as 5.1.1.
+    89→* Reminders via SMS/WhatsApp/email at key milestones. Progress tracker.
+    90→
+    91→**Technical requirements**
+    92→* Supabase Edge Functions (or Vercel Cron) for scheduled reminder jobs. Messaging sent through the provider-agnostic notification layer (Section 6.6).
+    93→
+    94→#### 5.1.3 Complaints Directory & Templates
+    95→**Functional requirements**
+    96→* Directory of insurer complaint contacts; CBJ contact details.
+    97→* Insurer- and CBJ-complaint templates auto-filled from case data. Export as PDF (Arabic RTL), email, or copy-to-clipboard.
+    98→
+    99→**Technical requirements**
+   100→* RTL-capable PDF generation (e.g., `@react-pdf/renderer` with Noto Sans Arabic embedded — validate in Section 9). Templates stored as MDX in the `legal_templates` table (Section 6.2), version-controlled and lawyer-approved before use (Section 7.2).
+   101→
+   102→#### 5.1.4 Anonymous Story & Abuse Reporting
+   103→**Functional requirements**
+   104→* Submission form, no PII required. Admin moderation queue before publishing. Public, filterable, anonymized stories page.
+   105→
+   106→**Technical requirements**
+   107→* Supabase RLS restricting raw submissions to admins. Rate limiting at the edge (e.g., Upstash) to prevent spam.
+   108→
+   109→#### 5.1.5 AI-Powered Step-by-Step Intake
+   110→**Functional requirements — 7 stages**
+   111→1. Triage & safety (death/injury/threats → emergency guidance).
+   112→2. Accident facts (date/time/location, police report, croquis, other party, insurance status).
+   113→3. Losses & damages.
+   114→4. Claims history (insurer, claim number, offers/denials).
+   115→5. Goals & constraints (desired outcome, lawyer budget, litigation willingness).
+   116→6. Document collection checklist.
+   117→7. Consent & disclaimers (active confirmation, not a pre-checked box).
+   118→* Output: structured `case_intake` JSON feeding the Calculator, Workflow, and (Phase 2) Drafting Mode.
+   119→
+   120→**Technical requirements**
+   121→* LLM provider abstracted behind a single interface (Section 6.4) so the underlying model (Grok, Gemini, or other) is swappable without touching intake logic — validate provider choice per Section 9 before committing.
+   122→* Structured output validated against a Zod/Pydantic schema before being trusted downstream. System prompt requires one question at a time, empathetic tone, and an explicit "I'm not sure — here's how to reach a lawyer" fallback rather than guessing.
+   123→
+   124→### 5.2 Phase 2 — AI Drafting & Case Management
+   125→
+   126→#### 5.2.1 Drafting Mode (AI Legal Companion)
+   127→**Functional requirements**
+   128→* Template library: insurer demand letter, CBJ complaint, statement of claim, settlement/release agreement, limited power of attorney, evidence list/chronology, expert request.
+   129→* Citation-aware drafting: each paragraph can show a "why this wording" panel citing the specific retrieved article.
+   130→* Plain-Arabic / Legal-Arabic toggle. Full version history.
+   131→* **Every draft must pass the Lawyer Review workflow (Section 7.1) before export/send is enabled** — this is enforced at the data layer, not just a UI checklist.
+   132→
+   133→**Technical requirements**
+   134→* Draft generation ≤ 60s after intake completion. Every legal claim in a draft carries at least one citation reference from the RAG layer. Full audit log of generation/edit/review/send events.
+   135→
+   136→#### 5.2.2 RAG Knowledge Base (Insurance Law & Court Procedure)
+   137→**Functional requirements**
+   138→* Indexed sources (priority order, each gated by `lawyer_verified = true` before indexing — Section 7.2): Civil Code liability/limitation provisions; compulsory motor insurance regulations; Civil Procedure Code; Motor Accidents Compensation Fund rules; CBJ Financial Consumer Protection instructions; publicly available Court of Cassation summaries for recurring ambiguities.
+   139→* Chunking by article/clause (200–400 tokens) with `{source, article_id, topic, language}` metadata. Hybrid retrieval (keyword + vector). Below-threshold retrieval confidence → assistant states uncertainty and offers lawyer referral instead of guessing.
+   140→
+   141→**Technical requirements**
+   142→* Supabase pgvector, 768-dim embeddings, ivfflat index. Retrieval latency ≤ 500ms. Weekly re-index or on-demand when a source changes.
+   143→
+   144→#### 5.2.3 Evidence Organizer & Claim Log
+   145→**Functional requirements**
+   146→* Uploads: police report, croquis, photos, medical reports, bills, salary slips, correspondence. Structured interaction log (date, contact, summary, outcome).
+   147→* Bad-faith pattern flags (repeated delays, unnecessary requests, lowball offers vs. calculated range). One-click demand-letter generation from the log (routes through 5.2.1 → 7.1).
+   148→
+   149→**Technical requirements**
+   150→* Supabase Storage with signed URLs. Malware scanning on upload. AES-256 at rest, TLS 1.3 in transit. File limits configurable, not hardcoded (validate real-world medical-file sizes in Section 9).
+   151→
+   152→#### 5.2.4 Lawyer & Legal Aid Directory
+   153→**Functional requirements**
+   154→* Filters: location, language, fee model, expertise. Profiles with bio, contact, verified-user reviews, self-reported success rate.
+   155→* One-click handoff packet: shares case intake, documents, claim log, and lawyer-approved drafts.
+   156→
+   157→**Technical requirements**
+   158→* Manual admin verification before a lawyer profile is live. Reviews restricted to verified accounts.
+   159→
+   160→#### 5.2.5 Anti-Corruption Education & Reporting
+   161→**Functional requirements**
+   162→* Education module on risks of selling/transferring a claim. Anonymous reporting form for suspicious actors, admin-only aggregation.
+   163→
+   164→**Technical requirements**
+   165→* No PII stored unless opted in. Encrypted at rest, admin-only access via RLS.
+   166→
+   167→### 5.3 Phase 3 — Litigation Support & Ecosystem
+   168→
+   169→#### 5.3.1 Court Procedure Guidance Module
+   170→Pre-filing checklist, statement-of-claim drafting, service/notification guidance, expert-evidence pathway, enforcement guidance — each step showing deadline, required form, fee, and a "generate this document" action routed through Lawyer Review (Section 7.1). All Civil Procedure Code citations require sign-off from your legal counsel before this module ships.
+   171→
+   172→#### 5.3.2 Lawyer Nomination & Engagement Letters
+   173→Matching logic (city, language, fee model, specialty, availability) feeding the 5.2.4 handoff packet, plus engagement-letter templates (Appendix A) with limited in-app editing and e-signature (Electronic Transactions Law compliant).
+   174→
+   175→#### 5.3.3 Regulator Dashboard (CBJ / Insurance Commission)
+   176→Aggregated, anonymized complaint/outcome data with k-anonymity thresholds and export tools. **Technically straightforward; commercially/legally dependent on CBJ or the Insurance Commission agreeing to receive the data and, if wanted, on an SSO integration** — a partnership prerequisite, not a build blocker for the rest of the platform.
+   177→
+   178→#### 5.3.4 Community Forum & Support Groups
+   179→Topic-categorized discussion, verified lawyer/NGO Q&A participation, automated + human moderation.
+   180→
+   181→### 5.4 Out of Scope / Non-Goals
+   182→
+   183→* Haqqi does not represent users in proceedings — it informs, organizes, drafts (with lawyer review), and refers.
+   184→* No AI-generated document is sendable/filable without passing the Lawyer Review workflow (Section 7.1), even after Phase 2 ships.
+   185→* No guaranteed compensation amounts or outcomes.
+   186→* No non-motor-accident personal injury claims in v1.
+   187→* No insurance underwriting or policy-sales functionality.
+   188→* Additional languages beyond Arabic/English are deferred, not committed to a phase.
+   189→
+   190→---
+   191→
+   192→## 6. Technical Architecture
+   193→
+   194→### 6.1 High-Level Stack
+   195→
+   196→| Layer | Technology | Notes |
+   197→| --- | --- | --- |
+   198→| Frontend | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui | Use the current stable major version; validate against whatever the rest of your platform portfolio is standardized on if this shares infrastructure with another product. |
+   199→| Backend | Next.js API routes / Server Actions | Add a separate service (e.g., Python) only if a specific need (heavy NLP, PDF pipeline) can't be met in the Next.js runtime — don't default to a second backend without a concrete reason. |
+   200→| Database | Supabase (Postgres + pgvector + Storage + Auth + Edge Functions) | |
+   201→| AI/LLM | Provider-agnostic layer (Section 6.4) over Grok, Gemini, or another model | Decide by Arabic-language quality, structured-output reliability, and cost at expected volume — see Section 9. |
+   202→| RAG | Supabase pgvector + hybrid (keyword + vector) search | |
+   203→| PDF Generation | `@react-pdf/renderer` or equivalent, RTL + Arabic font embedding | |
+   204→| Hosting | Vercel (frontend/API) + Supabase (backend) | |
+   205→| Monitoring | Sentry (errors), self-hosted analytics (Plausible/Matomo) | |
+   206→| Messaging | Twilio and/or WhatsApp Business API, transactional email provider | Behind the notification abstraction in 6.6 |
+   207→
+   208→### 6.2 Data Model (PostgreSQL)
+   209→
+   210→```sql
+   211→-- Users
+   212→CREATE TABLE users (
+   213→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   214→  email TEXT UNIQUE,
+   215→  phone TEXT,
+   216→  role TEXT DEFAULT 'victim', -- 'victim' | 'lawyer' | 'admin' | 'regulator'
+   217→  language TEXT DEFAULT 'ar',
+   218→  created_at TIMESTAMPTZ DEFAULT NOW()
+   219→);
+   220→
+   221→-- Case Intakes
+   222→CREATE TABLE case_intakes (
+   223→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   224→  user_id UUID REFERENCES users(id),
+   225→  intake_json JSONB,
+   226→  created_at TIMESTAMPTZ DEFAULT NOW()
+   227→);
+   228→
+   229→-- Accidents
+   230→CREATE TABLE accidents (
+   231→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   232→  user_id UUID REFERENCES users(id),
+   233→  accident_date DATE,
+   234→  location TEXT,
+   235→  type TEXT,
+   236→  injuries TEXT,
+   237→  other_party_insured BOOLEAN,
+   238→  created_at TIMESTAMPTZ DEFAULT NOW()
+   239→);
+   240→
+   241→-- Claims
+   242→CREATE TABLE claims (
+   243→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   244→  accident_id UUID REFERENCES accidents(id),
+   245→  insurer_name TEXT,
+   246→  policy_number TEXT,
+   247→  status TEXT,
+   248→  amount_claimed NUMERIC,
+   249→  amount_offered NUMERIC,
+   250→  amount_paid NUMERIC,
+   251→  created_at TIMESTAMPTZ DEFAULT NOW()
+   252→);
+   253→
+   254→-- Documents
+   255→CREATE TABLE documents (
+   256→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   257→  claim_id UUID REFERENCES claims(id),
+   258→  type TEXT,
+   259→  file_url TEXT,
+   260→  uploaded_at TIMESTAMPTZ DEFAULT NOW()
+   261→);
+   262→
+   263→-- Claim Logs
+   264→CREATE TABLE claim_logs (
+   265→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   266→  claim_id UUID REFERENCES claims(id),
+   267→  contact_date DATE,
+   268→  contact_person TEXT,
+   269→  summary TEXT,
+   270→  outcome TEXT,
+   271→  created_at TIMESTAMPTZ DEFAULT NOW()
+   272→);
+   273→
+   274→-- Complaints
+   275→CREATE TABLE complaints (
+   276→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   277→  claim_id UUID REFERENCES claims(id),
+   278→  target TEXT, -- 'insurer' | 'cbj' | 'court'
+   279→  template_type TEXT,
+   280→  content TEXT,
+   281→  sent_at TIMESTAMPTZ,
+   282→  created_at TIMESTAMPTZ DEFAULT NOW()
+   283→);
+   284→
+   285→-- Drafts (Drafting Mode) — extended with the Lawyer Review workflow fields
+   286→CREATE TABLE drafts (
+   287→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   288→  case_intake_id UUID REFERENCES case_intakes(id),
+   289→  template_type TEXT,
+   290→  version INT DEFAULT 1,
+   291→  content TEXT,
+   292→  plain_arabic_version TEXT,
+   293→  legal_arabic_version TEXT,
+   294→  citations JSONB,
+   295→  review_status TEXT DEFAULT 'pending_review', -- 'pending_review' | 'approved' | 'rejected' | 'sent'
+   296→  reviewed_by_lawyer_id UUID REFERENCES lawyers(id),
+   297→  review_comments TEXT,
+   298→  reviewed_at TIMESTAMPTZ,
+   299→  sent_at TIMESTAMPTZ, -- app enforces: only settable if review_status = 'approved'
+   300→  created_at TIMESTAMPTZ DEFAULT NOW()
+   301→);
+   302→
+   303→-- Stories (anonymous)
+   304→CREATE TABLE stories (
+   305→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   306→  accident_date DATE,
+   307→  insurer_name TEXT,
+   308→  description TEXT,
+   309→  outcome TEXT,
+   310→  is_approved BOOLEAN DEFAULT FALSE,
+   311→  created_at TIMESTAMPTZ DEFAULT NOW()
+   312→);
+   313→
+   314→-- Corruption Reports (anonymous)
+   315→CREATE TABLE corruption_reports (
+   316→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   317→  report_date DATE,
+   318→  location TEXT,
+   319→  description TEXT,
+   320→  evidence_urls TEXT[],
+   321→  is_anonymous BOOLEAN DEFAULT TRUE,
+   322→  created_at TIMESTAMPTZ DEFAULT NOW()
+   323→);
+   324→
+   325→-- Lawyers
+   326→CREATE TABLE lawyers (
+   327→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   328→  name TEXT,
+   329→  firm TEXT,
+   330→  location TEXT,
+   331→  languages TEXT[],
+   332→  fee_model TEXT,
+   333→  expertise TEXT[],
+   334→  contact_email TEXT,
+   335→  contact_phone TEXT,
+   336→  is_verified BOOLEAN DEFAULT FALSE,
+   337→  is_legal_reviewer BOOLEAN DEFAULT FALSE, -- can this lawyer approve drafts/content (Section 7)?
+   338→  created_at TIMESTAMPTZ DEFAULT NOW()
+   339→);
+   340→
+   341→-- Lawyer Reviews (user-submitted ratings)
+   342→CREATE TABLE lawyer_reviews (
+   343→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   344→  lawyer_id UUID REFERENCES lawyers(id),
+   345→  user_id UUID REFERENCES users(id),
+   346→  rating INT CHECK (rating BETWEEN 1 AND 5),
+   347→  comment TEXT,
+   348→  created_at TIMESTAMPTZ DEFAULT NOW()
+   349→);
+   350→
+   351→-- Handoff Packets
+   352→CREATE TABLE handoff_packets (
+   353→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   354→  case_intake_id UUID REFERENCES case_intakes(id),
+   355→  lawyer_id UUID REFERENCES lawyers(id),
+   356→  included_document_ids UUID[],
+   357→  included_draft_ids UUID[],
+   358→  sent_at TIMESTAMPTZ DEFAULT NOW()
+   359→);
+   360→
+   361→-- Engagement Letters
+   362→CREATE TABLE engagement_letters (
+   363→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   364→  lawyer_id UUID REFERENCES lawyers(id),
+   365→  user_id UUID REFERENCES users(id),
+   366→  template_type TEXT,
+   367→  content TEXT,
+   368→  signed_at TIMESTAMPTZ,
+   369→  created_at TIMESTAMPTZ DEFAULT NOW()
+   370→);
+   371→
+   372→-- Court Filings
+   373→CREATE TABLE court_filings (
+   374→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   375→  case_intake_id UUID REFERENCES case_intakes(id),
+   376→  filing_type TEXT,
+   377→  content TEXT,
+   378→  filed_at TIMESTAMPTZ,
+   379→  created_at TIMESTAMPTZ DEFAULT NOW()
+   380→);
+   381→
+   382→-- RAG: Legal Documents
+   383→CREATE TABLE legal_documents (
+   384→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   385→  title TEXT,
+   386→  content TEXT,
+   387→  source TEXT,
+   388→  article_id TEXT,
+   389→  topics TEXT[],
+   390→  language TEXT DEFAULT 'ar',
+   391→  embedding VECTOR(768),
+   392→  lawyer_verified BOOLEAN DEFAULT FALSE, -- gate before RAG indexing job picks it up
+   393→  verified_by_lawyer_id UUID REFERENCES lawyers(id),
+   394→  verified_at TIMESTAMPTZ,
+   395→  created_at TIMESTAMPTZ DEFAULT NOW()
+   396→);
+   397→
+   398→CREATE INDEX ON legal_documents USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+   399→CREATE INDEX ON legal_documents USING gin (topics);
+   400→CREATE INDEX ON legal_documents (article_id);
+   401→
+   402→-- Legal Rules Config (versioned, drives Calculator + Workflow deadlines)
+   403→CREATE TABLE legal_rules_config (
+   404→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   405→  version INT NOT NULL,
+   406→  rules_json JSONB NOT NULL, -- compensation categories, ranges, deadlines, doc checklists
+   407→  is_active BOOLEAN DEFAULT FALSE, -- only one active version at a time
+   408→  approved_by_lawyer_id UUID REFERENCES lawyers(id),
+   409→  approved_at TIMESTAMPTZ,
+   410→  created_at TIMESTAMPTZ DEFAULT NOW()
+   411→);
+   412→
+   413→-- Legal Templates (MDX, versioned, lawyer-approved)
+   414→CREATE TABLE legal_templates (
+   415→  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   416→  template_type TEXT NOT NULL, -- 'insurer_demand', 'cbj_complaint', 'statement_of_claim', etc.
+   417→  version INT NOT NULL,
+   418→  content_mdx TEXT NOT NULL,
+   419→  is_active BOOLEAN DEFAULT FALSE,
+   420→  approved_by_lawyer_id UUID REFERENCES lawyers(id),
+   421→  approved_at TIMESTAMPTZ,
+   422→  created_at TIMESTAMPTZ DEFAULT NOW()
+   423→);
+   424→```
+   425→
+   426→### 6.3 Row-Level Security Model
+   427→
+   428→| Table category | Read access | Write access |
+   429→| --- | --- | --- |
+   430→| User's own case data (`case_intakes`, `accidents`, `claims`, `documents`, `claim_logs`, `drafts`) | Owning user; assigned reviewing lawyer (post-handoff); admin | Owning user (create/edit pre-review); reviewing lawyer (review fields only); admin |
+   431→| `stories`, `corruption_reports` | Public: approved/published rows only; Admin: all rows | Anyone (create, anonymous); Admin (moderate) |
+   432→| `lawyers`, `lawyer_reviews` | Public (verified profiles only) | Admin (verification); verified users (reviews) |
+   433→| `legal_documents`, `legal_rules_config`, `legal_templates` | Public: active/verified content only via application layer; Admin & legal-reviewer lawyers: full read/write | Legal-reviewer lawyers (`is_legal_reviewer = true`) and admins only |
+   434→| Regulator dashboard views (Phase 3) | Approved regulator accounts only, via aggregated views with k-anonymity applied at the query layer | N/A (read-only) |
+   435→
+   436→### 6.4 AI/LLM Integration Layer
+   437→
+   438→* Single internal interface (e.g., `generateCompletion(prompt, context, schema)`) wrapping whichever provider is selected, so intake, drafting, and RAG-answer code never call a provider SDK directly. This is what makes the Grok-vs-Gemini decision (Section 9) a config change, not a rewrite.
+   439→* Structured-output mode (function calling / JSON schema) required for intake parsing and citation extraction — free-text parsing is not acceptable for data that feeds legal documents.
+   440→* System-prompt library stored server-side and versioned, not inlined ad hoc per call — the intake prompt, drafting prompt, and RAG-answer prompt should each be a reviewable, versioned asset (and a candidate for the same lawyer-approval gate as templates, since prompt wording affects legal-sounding output).
+   441→* Guardrails: confidence threshold below which the assistant must return an "uncertain, refer to lawyer" response rather than an answer; hard block on generating anything in the `court_filings` or `drafts` (CBJ/court target) tables without the case first passing through intake validation.
+   442→
+   443→### 6.5 RAG Pipeline
+   444→
+   445→1. **Ingestion**: source document → chunked (200–400 tokens, by article/clause) → embedded (768-dim) → inserted into `legal_documents` with `lawyer_verified = false`.
+   446→2. **Verification gate**: a legal-reviewer lawyer reviews and flips `lawyer_verified = true` via the Legal Content Management UI (Section 7.2) — the indexing/retrieval job only serves `lawyer_verified = true` rows.
+   447→3. **Retrieval**: hybrid BM25 + vector search, reranked to boost exact article-ID matches and topic relevance to the query.
+   448→4. **Answer generation**: retrieved chunks passed to the LLM layer (6.4) with instructions to cite `article_id` for every legal claim; below-threshold retrieval triggers the uncertainty fallback.
+   449→
+   450→### 6.6 Notification Layer
+   451→
+   452→* Abstracted interface (`sendNotification(channel, template, recipient, data)`) over SMS (Twilio), WhatsApp Business API, and transactional email — application code never calls a provider SDK directly, matching the pattern in 6.4.
+   453→* Queue-based sending with retry/backoff so a provider outage doesn't silently drop accident-deadline reminders.
+   454→
+   455→### 6.7 API Surface (representative, not exhaustive)
+   456→
+   457→| Endpoint | Purpose |
+   458→| --- | --- |
+   459→| `POST /api/intake/message` | Send/receive one turn of the AI intake conversation |
+   460→| `POST /api/calculator/estimate` | Run the Rights Calculator against the active `legal_rules_config` |
+   461→| `POST /api/drafts/generate` | Generate a draft from a case intake + template |
+   462→| `POST /api/drafts/:id/submit-for-review` | Move a draft to `pending_review` |
+   463→| `POST /api/drafts/:id/review` | Lawyer approves/rejects with comments |
+   464→| `POST /api/drafts/:id/send` | Blocked unless `review_status = 'approved'` |
+   465→| `GET /api/lawyer/review-queue` | Reviewing lawyer's pending items (drafts, RAG sources, templates) |
+   466→| `POST /api/legal-content/rules-config` | Propose a new `legal_rules_config` version (lawyer/admin only) |
+   467→| `POST /api/legal-content/rules-config/:id/approve` | Approve and activate a rules-config version |
+   468→| `POST /api/handoff` | Create a handoff packet to a lawyer |
+   469→| `POST /api/stories` / `POST /api/corruption-reports` | Anonymous submissions |
+   470→
+   471→---
+   472→
+   473→## 7. Lawyer Review & Legal Content Management (core feature)
+   474→
+   475→Since legal counsel is already engaged for the platform, this section specifies how that oversight is actually implemented in the product — not as a risk mitigation, but as a first-class workflow with its own UI, states, and data.
+   476→
+   477→### 7.1 Per-Document Review Workflow
+   478→
+   479→**States** (on `drafts.review_status`): `pending_review → approved | rejected → sent` (sent only reachable from `approved`).
+   480→
+   481→* Any draft generated by Drafting Mode (5.2.1) enters `pending_review` automatically.
+   482→* A reviewing lawyer (`lawyers.is_legal_reviewer = true`) sees it in their review queue (`GET /api/lawyer/review-queue`), can edit inline, leave comments, and approve or reject.
+   483→* Rejection returns the draft to the user/system with `review_comments` for revision and re-submission.
+   484→* `sent_at` is only settable by the application when `review_status = 'approved'` — enforced in the API layer and, ideally, with a DB constraint/trigger, not just client-side logic.
+   485→* Every state transition is timestamped and attributed (`reviewed_by_lawyer_id`, `reviewed_at`) for the audit log required in 5.2.1.
+   486→
+   487→### 7.2 Legal Content Management (ongoing curation, not just per-document review)
+   488→
+   489→Three content types need the same lawyer-approval discipline as individual drafts, since they drive what every user sees:
+   490→
+   491→* **Compensation rules** (`legal_rules_config`): versioned; a new version is proposed, reviewed, and only becomes `is_active` after a legal reviewer approves it. The Rights Calculator and Workflow deadlines always read the currently active version.
+   492→* **RAG legal corpus** (`legal_documents`): nothing is retrievable by the AI layer until `lawyer_verified = true` (Section 6.5).
+   493→* **Document templates** (`legal_templates`): versioned MDX, same propose → approve → activate flow.
+   494→
+   495→This gives your legal counsel a real admin surface (a simple internal dashboard, not just "review a PDF over email") to keep the platform's legal content current without needing an engineer for every wording change.
+   496→
+   497→### 7.3 Roles
+   498→
+   499→* `lawyers.is_legal_reviewer` distinguishes lawyers who can approve platform content/drafts from lawyers who are simply listed in the directory (5.2.4) for case handoff — a directory lawyer isn't automatically a reviewer, and vice versa isn't required either, but your engaged legal counsel would typically be flagged `is_legal_reviewer = true`.
+   500→* `users.role = 'admin'` can manage lawyer verification and `is_legal_reviewer` flags.
+   501→
+   502→### 7.4 What Still Needs Legal Counsel's Direct Input
+   503→
+   504→Regardless of the review workflow above, these specific items need your lawyer's direct input before they're built into rules/templates/RAG content — the workflow enforces *that* review happens, not what the correct legal content actually is:
+   505→
+   506→* Confirmed article/regulation numbers and current deadlines (Civil Code, compulsory insurance regulation, Civil Procedure Code, CBJ instructions) — every number in Section 2 and elsewhere is a placeholder.
+   507→* Sign-off on the initial `legal_rules_config` v1 and each `legal_templates` entry before Phase 1/2 launch respectively.
+   508→* Confirmation of current CBJ complaint-channel contact details before they're hardcoded into the Complaints Directory (5.1.3).
+   509→
+   510→---
+   511→
+   512→## 8. Non-Functional Requirements
+   513→
+   514→| Category | Requirement |
+   515→| --- | --- |
+   516→| Performance | Page load < 2s; API p95 < 500ms; LLM latency ≤ 3s/turn; RAG retrieval ≤ 500ms |
+   517→| Accessibility | WCAG 2.1 AA — RTL, screen readers, keyboard nav |
+   518→| Localization | Arabic default, English toggle |
+   519→| Mobile | Responsive, PWA with offline support for key pages |
+   520→| Security | TLS 1.3 in transit, AES-256 at rest, RLS per Section 6.3, malware scanning on upload |
+   521→| Auditability | Every AI generation and every review-workflow transition logged with actor and timestamp |
+   522→| Data compliance | Jordan Personal Data Protection Law — consent capture, deletion requests |
+   523→
+   524→---
+   525→
+   526→## 9. Technical Validation Plan
+   527→
+   528→Concrete things worth prototyping before committing to full-scale development — this is the "validate the technical tools" work:
+   529→
+   530→1. **LLM provider bake-off**: run the same set of Arabic-language legal-intake and drafting prompts through Grok and Gemini (and any other candidate). Compare structured-output reliability, Arabic fluency/register (legal Arabic vs. plain Arabic), latency, and cost per 1K case intakes at your expected volume. Pick one and build the abstraction layer (6.4) around it — don't leave both wired in "just in case."
+   531→2. **RTL Arabic PDF generation spike**: confirm `@react-pdf/renderer` (or an alternative) correctly renders mixed Arabic/English, right-to-left layout, and Noto Sans Arabic embedding for a realistic complaint-letter template before building the full template library.
+   532→3. **Hybrid RAG retrieval accuracy**: index a small real sample of Jordanian legal text (even 20–30 lawyer-approved articles) and test whether hybrid BM25 + vector search actually surfaces the right article for representative Arabic legal queries — this is the highest-risk technical assumption in the whole spec.
+   533→4. **Structured intake extraction reliability**: test whether the chosen LLM reliably produces schema-valid JSON from a multi-turn Arabic conversation, including messy/incomplete user answers, before building the Calculator and Drafting Mode on top of that output.
+   534→5. **Notification deliverability**: confirm actual SMS/WhatsApp delivery rates and latency for Jordanian numbers through your chosen provider before relying on it for statute-of-limitations reminders.
+   535→6. **Review-workflow ergonomics**: build the lawyer review queue (7.1) early and have your actual engaged lawyer use it on a handful of real draft examples — this is a UI/workflow risk (will a busy lawyer actually use this queue) as much as a technical one.
+   536→
+   537→---
+   538→
+   539→## Appendix A: Engagement Letter Templates (Arabic/English)
+   540→
+   541→*(Starting drafts — route through the Legal Content Management workflow in Section 7.2 for approval before use, same as any other template.)*
+   542→
+   543→### A.1 Contingency Engagement Letter (Arabic)
+   544→
+   545→اتفاقية تمثيل قانوني (على أساس نسبة من التعويض)
+   546→
+   547→بين: [اسم المحامي/المكتب]، ومقره [العنوان]، ("المحامي")
+   548→وبين: [اسم العميل]، رقم الهوية [___]، ("العميل")
+   549→
+   550→١. النطاق: يمثل المحامي العميل في المطالبة التأمينية، الشكوى لدى البنك المركزي، ورفع الدعوى إن لزم.
+   551→٢. الأجر: نسبة [___]% من صافي التعويض المُستلم (بعد خصم الرسوم القضائية وأتعاب الخبراء).
+   552→٣. المصروفات: الرسوم القضائية، أتعاب الخبراء، وطوابع البريد تُخصم من التعويض قبل احتساب النسبة.
+   553→٤. موافقة التسوية: لا يتم قبول أي تسوية دون موافقة العميل الخطية.
+   554→٥. السرية: نلتزم بسرية معلوماتك وفق قانون حماية البيانات الشخصية.
+   555→٦. الإنهاء: يجوز لأي طرف إنهاء التمثيل بإشعار خطي؛ تستحق الأتعاب عن العمل المنجز حتى تاريخ الإنهاء.
+   556→٧. الاختصاص: محاكم الأردن.
+   557→
+   558→توقيع المحامي: __________    تاريخ: ___/___/_____
+   559→توقيع العميل: __________    تاريخ: ___/___/_____
+   560→
+   561→### A.2 Contingency Engagement Letter (English)
+   562→
+   563→Legal Representation Agreement (Contingency Fee)
+   564→
+   565→Between: [Lawyer/Firm Name], located at [Address] ("Lawyer")
+   566→And: [Client Name], ID No. [___] ("Client")
+   567→
+   568→1. Scope: Lawyer represents Client in the insurance claim, CBJ complaint, and court filing if needed.
+   569→2. Fee: [___]% of net compensation received (after court fees and expert fees).
+   570→3. Costs: Court fees, expert fees, and postage are deducted from compensation before calculating the percentage.
+   571→4. Settlement approval: No settlement is accepted without Client's written consent.
+   572→5. Confidentiality: Client information is kept confidential per Jordan's Personal Data Protection Law.
+   573→6. Termination: Either party may terminate with written notice; fees are due for work performed to date.
+   574→7. Jurisdiction: Courts of Jordan.
+   575→
+   576→Lawyer Signature: __________    Date: ___/___/_____
+   577→Client Signature: __________    Date: ___/___/_____
+   578→
+   579→### A.3 Hourly/Fixed Engagement Letter (Arabic)
+   580→
+   581→اتفاقية تمثيل قانوني (أجر ساعي/مقطوع)
+   582→
+   583→بين: [اسم المحامي/المكتب]، ومقره [العنوان]، ("المحامي")
+   584→وبين: [اسم العميل]، رقم الهوية [___]، ("العميل")
+   585→
+   586→١. النطاق: [تفاوض/صياغة/تقاضي].
+   587→٢. الأجر: [___] دينار/ساعة أو مبلغ مقطوع [___] دينار للمرحلة [___].
+   588→٣. المصروفات: تُدفع فعليًا (رسوم محكمة، خبراء، بريد).
+   589→٤. الفواتير: تُصدر كل [١٥/٣٠] يومًا؛ السداد خلال [٧] أيام.
+   590→٥. باقي الشروط (السرية، التسوية، الإنهاء، الاختصاص) كما في نموذج النسبة.
+   591→
+   592→توقيع المحامي: __________    تاريخ: ___/___/_____
+   593→توقيع العميل: __________    تاريخ: ___/___/_____
+   594→
+   595→### A.4 Hourly/Fixed Engagement Letter (English)
+   596→
+   597→Legal Representation Agreement (Hourly/Fixed Fee)
+   598→
+   599→Between: [Lawyer/Firm Name], located at [Address] ("Lawyer")
+   600→And: [Client Name], ID No. [___] ("Client")
+   601→
+   602→1. Scope: [Negotiation/Drafting/Litigation].
+   603→2. Fee: [___] JOD/hour or fixed fee [___] JOD for stage [___].
+   604→3. Costs: Pay-as-incurred (court fees, experts, postage).
+   605→4. Billing: Invoiced every [15/30] days; payment due within [7] days.
+   606→5. Other terms (confidentiality, settlement, termination, jurisdiction) as in the contingency model.
+   607→
+   608→Lawyer Signature: __________    Date: ___/___/_____
+   609→Client Signature: __________    Date: ___/___/_____
+   610→

@@ -1,0 +1,40 @@
+"use client";
+
+import { useAppStore } from "@/lib/i18n/store";
+import { Header } from "@/components/haqqi/header";
+import { Footer } from "@/components/haqqi/footer";
+import { HomeView } from "@/components/views/home-view";
+import { IntakeView } from "@/components/views/intake-view";
+import { CalculatorView } from "@/components/views/calculator-view";
+import { WorkflowView } from "@/components/views/workflow-view";
+import { DraftingView } from "@/components/views/drafting-view";
+import { ReviewQueueView } from "@/components/views/review-queue-view";
+import { LegalContentView } from "@/components/views/legal-content-view";
+import { EvidenceView } from "@/components/views/evidence-view";
+import { StoriesView } from "@/components/views/stories-view";
+import { ComplaintsView } from "@/components/views/complaints-view";
+import { CorruptionView } from "@/components/views/corruption-view";
+
+export default function Home() {
+  const view = useAppStore((s) => s.view);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        {view === "home" && <HomeView />}
+        {view === "intake" && <IntakeView />}
+        {view === "calculator" && <CalculatorView />}
+        {view === "workflow" && <WorkflowView />}
+        {view === "drafting" && <DraftingView />}
+        {view === "review" && <ReviewQueueView />}
+        {view === "legalContent" && <LegalContentView />}
+        {view === "evidence" && <EvidenceView />}
+        {view === "stories" && <StoriesView />}
+        {view === "complaints" && <ComplaintsView />}
+        {view === "corruption" && <CorruptionView />}
+      </main>
+      <Footer />
+    </div>
+  );
+}

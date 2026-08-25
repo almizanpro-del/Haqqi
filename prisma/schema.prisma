@@ -1,0 +1,217 @@
+// Haqqi PRD v3.0 — Prisma schema (SQLite, MVP)
+// Mirrors the data model in PRD §6.2 (adapted: arrays/JSON stored as String)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  phone     String?
+  role      String   @default("victim") // victim | lawyer | admin | regulator
+  language  String   @default("ar")
+  name      String?
+  createdAt DateTime @default(now())
+  cases     Case[]
+  drafts    Draft[]
+}
+
+model Case {
+  id                  String      @id @default(cuid())
+  userId              String
+  user                User        @relation(fields: [userId], references: [id])
+  intakeJson          String      // JSON — output of AI intake (7 stages)
+  stage               Int         @default(0) // current intake stage (0..7)
+  completed           Boolean     @default(false)
+  accidentDate        DateTime?
+  location            String?
+  accidentType        String?
+  injuries            String?
+  otherPartyInsured   Boolean?
+  createdAt           DateTime    @default(now())
+  claims              Claim[]
+  drafts              Draft[]
+  evidence            Evidence[]
+  claimLogs           ClaimLog[]
+  handoffPackets      HandoffPacket[]
+}
+
+model Claim {
+  id            String       @id @default(cuid())
+  caseId        String
+  case          Case         @relation(fields: [caseId], references: [id])
+  insurerName   String?
+  policyNumber  String?
+  status        String?
+  amountClaimed Float?
+  amountOffered Float?
+  amountPaid    Float?
+  createdAt     DateTime     @default(now())
+  documents     Document[]
+  claimLogs     ClaimLog[]
+  complaints    Complaint[]
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  claimId    String
+  claim      Claim    @relation(fields: [claimId], references: [id])
+  type       String
+  fileName   String
+  fileUrl    String?
+  uploadedAt DateTime @default(now())
+}
+
+model Evidence {
+  id         String   @id @default(cuid())
+  caseId     String
+  case       Case     @relation(fields: [caseId], references: [id])
+  type       String   // police_report | croquis | photo | medical | bill | salary_slip | correspondence
+  fileName   String
+  fileUrl    String?
+  note       String?
+  uploadedAt DateTime @default(now())
+}
+
+model ClaimLog {
+  id            String    @id @default(cuid())
+  caseId        String
+  case          Case      @relation(fields: [caseId], references: [id])
+  claimId       String?
+  claim         Claim?    @relation(fields: [claimId], references: [id])
+  contactDate   DateTime
+  contactPerson String?
+  summary       String
+  outcome       String?
+  badFaithFlag  String?   // delay | unnecessary_request | lowball | misrepresentation | none
+  createdAt     DateTime  @default(now())
+}
+
+model Draft {
+  id                  String    @id @default(cuid())
+  caseId              String?
+  case                Case?     @relation(fields: [caseId], references: [id])
+  userId              String
+  user                User      @relation(fields: [userId], references: [id])
+  templateType        String    // insurer_demand | cbj_complaint | statement_of_claim | settlement_release | power_of_attorney | evidence_list | expert_request
+  version             Int       @default(1)
+  content             String
+  plainArabicVersion  String?
+  legalArabicVersion  String?
+  citations           String?   // JSON array of {source, article_id, topic, language}
+  reviewStatus        String    @default("pending_review") // pending_review | approved | rejected | sent
+  reviewedByLawyerId  String?
+  reviewComments      String?
+  reviewedAt          DateTime?
+  sentAt              DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  reviewLogs          ReviewLog[]
+}
+
+model Lawyer {
+  id               String   @id @default(cuid())
+  name             String
+  firm             String?
+  location         String?
+  languages        String   // JSON array
+  feeModel         String?
+  expertise        String   // JSON array
+  contactEmail     String?
+  contactPhone     String?
+  isVerified       Boolean  @default(false)
+  isLegalReviewer  Boolean  @default(false)
+  createdAt        DateTime @default(now())
+}
+
+model LegalRulesConfig {
+  id                  String    @id @default(cuid())
+  version             Int
+  rulesJson           String    // JSON: compensation categories, ranges, deadlines, doc checklists
+  isActive            Boolean   @default(false)
+  approvedByLawyerId  String?
+  approvedAt          DateTime?
+  createdAt           DateTime  @default(now())
+}
+
+model LegalTemplate {
+  id                  String    @id @default(cuid())
+  templateType        String
+  version             Int
+  contentMdx          String
+  isActive            Boolean   @default(false)
+  approvedByLawyerId  String?
+  approvedAt          DateTime?
+  createdAt           DateTime  @default(now())
+}
+
+model LegalDocument {
+  id                  String    @id @default(cuid())
+  title               String
+  content             String
+  source              String?
+  articleId           String?
+  topics              String    // JSON array
+  language            String    @default("ar")
+  lawyerVerified      Boolean   @default(false)
+  verifiedByLawyerId  String?
+  verifiedAt          DateTime?
+  createdAt           DateTime  @default(now())
+}
+
+model Story {
+  id           String    @id @default(cuid())
+  accidentDate DateTime?
+  insurerName  String?
+  description  String
+  outcome      String?
+  isApproved   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+}
+
+model CorruptionReport {
+  id           String   @id @default(cuid())
+  reportDate   DateTime @default(now())
+  location     String?
+  description  String
+  evidenceUrls String   // JSON array
+  isAnonymous  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model Complaint {
+  id           String    @id @default(cuid())
+  claimId      String
+  claim        Claim     @relation(fields: [claimId], references: [id])
+  target       String    // insurer | cbj | court
+  templateType String?
+  content      String?
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model HandoffPacket {
+  id                  String   @id @default(cuid())
+  caseId              String
+  case                Case     @relation(fields: [caseId], references: [id])
+  lawyerId            String?
+  includedDocumentIds String   // JSON
+  includedDraftIds    String   // JSON
+  sentAt              DateTime @default(now())
+}
+
+model ReviewLog {
+  id        String   @id @default(cuid())
+  draftId   String
+  draft     Draft    @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  action    String   // submitted | approved | rejected | sent | generated | edited
+  actorId   String?
+  comments  String?
+  createdAt DateTime @default(now())
+}
