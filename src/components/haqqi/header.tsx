@@ -34,6 +34,8 @@ import {
   BarChart3,
   Bell,
   Shield,
+  LayoutDashboard,
+  Settings as SettingsIcon,
 } from "lucide-react";
 
 interface NavItem {
@@ -46,6 +48,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { view: "home", labelKey: "nav.home", icon: Home },
+  { view: "dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { view: "intake", labelKey: "nav.intake", icon: MessageSquare, phase: 1 },
   { view: "calculator", labelKey: "nav.calculator", icon: Calculator, phase: 1 },
   { view: "workflow", labelKey: "nav.workflow", icon: ListChecks, phase: 1 },
@@ -64,6 +67,7 @@ const NAV_ITEMS: NavItem[] = [
   { view: "regulator", labelKey: "nav.regulator", icon: BarChart3, phase: 3, rolesAllowed: ["admin", "regulator"] },
   { view: "notifications", labelKey: "nav.notifications", icon: Bell, phase: 3, rolesAllowed: ["lawyer", "admin"] },
   { view: "moderation", labelKey: "nav.moderation", icon: Shield, phase: 3, rolesAllowed: ["admin"] },
+  { view: "settings", labelKey: "nav.settings", icon: SettingsIcon },
 ];
 
 export function Header() {

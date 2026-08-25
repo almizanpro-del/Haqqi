@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 export function HomeView() {
   const t = useAppStore((s) => s.t);
   const setView = useAppStore((s) => s.setView);
+  const activeCaseId = useAppStore((s) => s.activeCaseId);
   const lang = useAppStore((s) => s.lang);
   const Arrow = lang === "ar" ? ArrowLeft : ArrowRight;
 
@@ -79,6 +80,17 @@ export function HomeView() {
               {t("hero.cta.calculator")}
               <Arrow className="h-4 w-4" />
             </Button>
+            {activeCaseId && (
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => setView("dashboard")}
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-2"
+              >
+                {t("nav.dashboard")}
+                <Arrow className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           <p className="mt-6 text-xs text-white/70 max-w-2xl leading-relaxed">
             ⚠ {t("hero.disclaimer")}

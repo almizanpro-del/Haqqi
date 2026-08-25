@@ -30,6 +30,8 @@ export const translations = {
     "nav.regulator": "لوحة الجهة الرقابية",
     "nav.notifications": "سجل الإشعارات",
     "nav.moderation": "قائمة الإشراف",
+    "nav.dashboard": "لوحة القضية",
+    "nav.settings": "الإعدادات",
 
     // Hero
     "hero.title": "افهم حقوقك. نظّم مطالبتك. لا تُخدع.",
@@ -348,6 +350,8 @@ export const translations = {
     "nav.regulator": "Regulator Dashboard",
     "nav.notifications": "Notifications Log",
     "nav.moderation": "Moderation Queue",
+    "nav.dashboard": "Case Dashboard",
+    "nav.settings": "Settings",
 
     // Hero
     "hero.title": "Know your rights. Organize your claim. Don't be exploited.",

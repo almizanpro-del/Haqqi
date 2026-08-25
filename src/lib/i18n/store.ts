@@ -23,7 +23,9 @@ export type View =
   | "rag"
   | "regulator"
   | "notifications"
-  | "moderation";
+  | "moderation"
+  | "dashboard"
+  | "settings";
 
 export type Role = "victim" | "lawyer" | "admin" | "regulator";
 

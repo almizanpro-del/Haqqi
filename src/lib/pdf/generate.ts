@@ -1,15 +1,50 @@
 // RTL Arabic PDF generation (PRD §5.1.3, §9.2)
-// Uses jsPDF. For proper Arabic shaping, a production build should embed Noto Sans Arabic
-// and use a shaping engine (e.g., arabic-reshaper + python-bidi via a Python sidecar).
-// For the MVP demo we generate a PDF that lays out the content RTL with Latin fallback.
+// Uses jsPDF with DejaVu Sans embedded (165 Arabic glyphs) for proper Arabic rendering.
+// Note: DejaVu Sans does not include an Arabic shaping engine, so letters render in
+// isolated form (not joined). For fully-shaped Arabic text, a production build should
+// embed Noto Sans Arabic and use a shaping library (e.g., arabic-reshaper + python-bidi
+// via a Python sidecar, or @react-pdf/renderer with React rendering).
+//
+// This implementation provides:
+// - Proper RTL layout (text aligned right, lines reversed)
+// - Arabic glyph rendering (letters visible, just not joined)
+// - Brand header, metadata block, disclaimer, page numbers
+// - Multi-page support
 
 import { jsPDF } from "jspdf";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-function shapeArabic(text: string): string {
-  // Reverse for RTL display when no shaping engine is available
+let fontLoaded = false;
+let fontBase64: string | null = null;
+let fontBoldBase64: string | null = null;
+
+function loadFonts() {
+  if (fontLoaded) return;
+  try {
+    const fontPath = join(process.cwd(), "public", "fonts", "DejaVuSans.ttf");
+    const fontBoldPath = join(process.cwd(), "public", "fonts", "DejaVuSans-Bold.ttf");
+    fontBase64 = readFileSync(fontPath).toString("base64");
+    fontBoldBase64 = readFileSync(fontBoldPath).toString("base64");
+  } catch (e) {
+    console.warn("[pdf] Could not load DejaVu fonts, falling back to helvetica:", e);
+  }
+  fontLoaded = true;
+}
+
+// Reverse RTL text line by line (preserving Latin words within Arabic lines)
+function shapeRtl(text: string): string {
   return text.split("\n").map((line) => {
-    const tokens = line.split(/(\s+)/);
-    return tokens.reverse().join("");
+    // Detect if line is mostly Arabic
+    const arabicChars = (line.match(/[\u0600-\u06FF]/g) ?? []).length;
+    const latinChars = (line.match(/[a-zA-Z]/g) ?? []).length;
+    if (arabicChars > latinChars) {
+      // Reverse the line character-by-character for RTL display
+      // (proper shaping would join letters, but jsPDF without a shaping engine
+      // renders them isolated — this is a known limitation documented in PRD §9.2)
+      return line.split("").reverse().join("");
+    }
+    return line;
   }).join("\n");
 }
 
@@ -23,33 +58,49 @@ export function generateDraftPDF(opts: {
 }): Buffer {
   const { title, content, language, caseId, draftId, metadata = {} } = opts;
 
+  loadFonts();
+
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  // Register the Arabic-capable font
+  if (fontBase64) {
+    doc.addFileToVFS("DejaVuSans.ttf", fontBase64);
+    doc.addFont("DejaVuSans.ttf", "DejaVuSans", "normal");
+    if (fontBoldBase64) {
+      doc.addFileToVFS("DejaVuSans-Bold.ttf", fontBoldBase64);
+      doc.addFont("DejaVuSans-Bold.ttf", "DejaVuSans", "bold");
+    }
+    doc.setFont("DejaVuSans");
+  }
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 50;
   const maxWidth = pageWidth - 2 * margin;
+  const isRtl = language === "ar";
 
   // Header bar
   doc.setFillColor(20, 80, 90); // brand teal
   doc.rect(0, 0, pageWidth, 60, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.text("Haqqi - Hqqy", margin, 38);
+  doc.setFont("DejaVuSans", "bold");
+  doc.text("Haqqi - حقي", margin, 38);
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("DejaVuSans", "normal");
   doc.text("Your Rights After a Car Accident in Jordan", pageWidth - margin, 38, { align: "right" });
 
   // Title
   doc.setTextColor(20, 40, 50);
   doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("DejaVuSans", "bold");
   const titleY = 90;
-  doc.text(title, margin, titleY);
+  const shapedTitle = isRtl ? shapeRtl(title) : title;
+  doc.text(shapedTitle, isRtl ? pageWidth - margin : margin, titleY);
 
   // Metadata block
   doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("DejaVuSans", "normal");
   doc.setTextColor(100, 100, 100);
   let metaY = titleY + 20;
   const metaEntries: Array<[string, string]> = [
@@ -59,29 +110,30 @@ export function generateDraftPDF(opts: {
     ...Object.entries(metadata),
   ];
   for (const [k, v] of metaEntries) {
-    doc.text(`${k}: ${v}`, margin, metaY);
+    const line = `${k}: ${v}`;
+    doc.text(isRtl ? shapeRtl(line) : line, isRtl ? pageWidth - margin : margin, metaY);
     metaY += 14;
   }
 
   // Disclaimer
   doc.setTextColor(180, 80, 40);
   doc.setFontSize(8);
-  doc.text(
-    language === "ar"
-      ? "Tanbeeh: Generated by Haqqi. Legal numbers are placeholders pending counsel approval."
-      : "Disclaimer: This document was generated by Haqqi. Legal numbers are placeholders pending counsel approval.",
-    margin,
-    metaY + 10,
-  );
+  const disclaimer = language === "ar"
+    ? "تنبيه: هذه الوثيقة مولّدة بواسطة حقي. الأرقام القانونية عناصر نائبة بانتظار اعتماد المستشار القانوني."
+    : "Disclaimer: This document was generated by Haqqi. Legal numbers are placeholders pending counsel approval.";
+  doc.text(isRtl ? shapeRtl(disclaimer) : disclaimer, isRtl ? pageWidth - margin : margin, metaY + 10, {
+    maxWidth,
+    align: isRtl ? "right" : "left",
+  });
 
   // Content
   doc.setTextColor(20, 40, 50);
   doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("DejaVuSans", "normal");
 
   const contentY = metaY + 35;
-  const processedContent = language === "ar" ? shapeArabic(content) : content;
-  const lines = doc.splitTextToSize(processedContent, maxWidth);
+  const shapedContent = isRtl ? shapeRtl(content) : content;
+  const lines = doc.splitTextToSize(shapedContent, maxWidth);
 
   let y = contentY;
   const lineHeight = 16;
@@ -90,8 +142,8 @@ export function generateDraftPDF(opts: {
       doc.addPage();
       y = margin;
     }
-    doc.text(line, language === "ar" ? pageWidth - margin : margin, y, {
-      align: language === "ar" ? "right" : "left",
+    doc.text(line, isRtl ? pageWidth - margin : margin, y, {
+      align: isRtl ? "right" : "left",
     });
     y += lineHeight;
   }
@@ -102,8 +154,11 @@ export function generateDraftPDF(opts: {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
+    const footerText = language === "ar"
+      ? `صفحة ${i} من ${pageCount} — حقي`
+      : `Page ${i} of ${pageCount} — Haqqi`;
     doc.text(
-      `${language === "ar" ? "Safha" : "Page"} ${i} / ${pageCount}`,
+      isRtl ? shapeRtl(footerText) : footerText,
       pageWidth / 2,
       pageHeight - 20,
       { align: "center" },
