@@ -33,6 +33,7 @@ import {
   Search,
   BarChart3,
   Bell,
+  Shield,
 } from "lucide-react";
 
 interface NavItem {
@@ -62,6 +63,7 @@ const NAV_ITEMS: NavItem[] = [
   { view: "legalContent", labelKey: "nav.legalContent", icon: BookOpen, phase: 2, rolesAllowed: ["lawyer", "admin"] },
   { view: "regulator", labelKey: "nav.regulator", icon: BarChart3, phase: 3, rolesAllowed: ["admin", "regulator"] },
   { view: "notifications", labelKey: "nav.notifications", icon: Bell, phase: 3, rolesAllowed: ["lawyer", "admin"] },
+  { view: "moderation", labelKey: "nav.moderation", icon: Shield, phase: 3, rolesAllowed: ["admin"] },
 ];
 
 export function Header() {

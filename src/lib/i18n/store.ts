@@ -22,7 +22,8 @@ export type View =
   | "forum"
   | "rag"
   | "regulator"
-  | "notifications";
+  | "notifications"
+  | "moderation";
 
 export type Role = "victim" | "lawyer" | "admin" | "regulator";
 

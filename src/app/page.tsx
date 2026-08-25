@@ -21,6 +21,7 @@ import { ForumView } from "@/components/views/forum-view";
 import { RagSearchView } from "@/components/views/rag-search-view";
 import { RegulatorView } from "@/components/views/regulator-view";
 import { NotificationsView } from "@/components/views/notifications-view";
+import { ModerationView } from "@/components/views/moderation-view";
 
 export default function Home() {
   const view = useAppStore((s) => s.view);
@@ -47,6 +48,7 @@ export default function Home() {
         {view === "rag" && <RagSearchView />}
         {view === "regulator" && <RegulatorView />}
         {view === "notifications" && <NotificationsView />}
+        {view === "moderation" && <ModerationView />}
       </main>
       <Footer />
     </div>

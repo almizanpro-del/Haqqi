@@ -29,6 +29,7 @@ export const translations = {
     "nav.rag": "بحث RAG",
     "nav.regulator": "لوحة الجهة الرقابية",
     "nav.notifications": "سجل الإشعارات",
+    "nav.moderation": "قائمة الإشراف",
 
     // Hero
     "hero.title": "افهم حقوقك. نظّم مطالبتك. لا تُخدع.",
@@ -346,6 +347,7 @@ export const translations = {
     "nav.rag": "RAG Search",
     "nav.regulator": "Regulator Dashboard",
     "nav.notifications": "Notifications Log",
+    "nav.moderation": "Moderation Queue",
 
     // Hero
     "hero.title": "Know your rights. Organize your claim. Don't be exploited.",

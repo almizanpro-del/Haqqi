@@ -19,6 +19,8 @@ import {
   ScrollText,
   History,
   FileDown,
+  Edit,
+  Save,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +65,8 @@ export function DraftingView() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activeDraft, setActiveDraft] = useState<Draft | null>(null);
   const [loadingList, setLoadingList] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingDraft, setEditingDraft] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,6 +179,26 @@ export function DraftingView() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast({ title: lang === "ar" ? "تم تصدير PDF" : "PDF exported" });
+  }
+
+  async function handleSaveEdit() {
+    if (!activeDraft || editingDraft === null) return;
+    const res = await fetch(`/api/drafts/${activeDraft.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: editingDraft }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast({ title: lang === "ar" ? "تم الحفظ" : "Saved" });
+      setActiveDraft(data.draft);
+      setIsEditing(false);
+      setEditingDraft(null);
+      await refreshList();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toast({ title: "Error", description: err?.error ?? "", variant: "destructive" });
+    }
   }
 
   const statusBadge = (status: ReviewStatus) => {
@@ -393,10 +417,31 @@ export function DraftingView() {
                   </TabsList>
                   <TabsContent value="content">
                     <Textarea
-                      value={activeDraft.content}
-                      readOnly
+                      value={editingDraft !== null ? editingDraft : activeDraft.content}
+                      readOnly={!isEditing}
+                      onChange={(e) => setEditingDraft(e.target.value)}
                       className="min-h-[400px] font-mono text-xs leading-relaxed"
                     />
+                    {activeDraft.reviewStatus === "pending_review" && (
+                      <div className="flex gap-2 justify-end mt-2">
+                        {!isEditing ? (
+                          <Button size="sm" variant="outline" onClick={() => { setEditingDraft(activeDraft.content); setIsEditing(true); }} className="gap-1">
+                            <Edit className="h-3 w-3" />
+                            {lang === "ar" ? "تعديل" : "Edit"}
+                          </Button>
+                        ) : (
+                          <>
+                            <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditingDraft(null); }} className="text-xs">
+                              {t("common.cancel")}
+                            </Button>
+                            <Button size="sm" onClick={handleSaveEdit} className="bg-brand text-white hover:bg-brand/90 gap-1">
+                              <Save className="h-3 w-3" />
+                              {t("common.save")}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                     {activeDraft.reviewComments && (
                       <div className="mt-2 text-xs">
                         <span className="font-medium">{t("review.comments")}: </span>
