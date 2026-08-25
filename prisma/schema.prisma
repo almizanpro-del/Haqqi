@@ -20,6 +20,7 @@ model User {
   createdAt DateTime @default(now())
   cases     Case[]
   drafts    Draft[]
+  engagementLetters EngagementLetter[]
 }
 
 model Case {
@@ -40,6 +41,8 @@ model Case {
   evidence            Evidence[]
   claimLogs           ClaimLog[]
   handoffPackets      HandoffPacket[]
+  courtFilings        CourtFiling[]
+  engagementLetters   EngagementLetter[]
 }
 
 model Claim {
@@ -125,9 +128,14 @@ model Lawyer {
   expertise        String   // JSON array
   contactEmail     String?
   contactPhone     String?
+  bio              String?
+  successRate      Float?   // self-reported (PRD §5.2.4)
   isVerified       Boolean  @default(false)
   isLegalReviewer  Boolean  @default(false)
   createdAt        DateTime @default(now())
+  reviews          LawyerReview[]
+  handoffPackets   HandoffPacket[]
+  engagementLetters EngagementLetter[]
 }
 
 model LegalRulesConfig {
@@ -201,8 +209,11 @@ model HandoffPacket {
   caseId              String
   case                Case     @relation(fields: [caseId], references: [id])
   lawyerId            String?
+  lawyer              Lawyer?  @relation(fields: [lawyerId], references: [id])
   includedDocumentIds String   // JSON
   includedDraftIds    String   // JSON
+  message             String?  // optional cover note from user to lawyer
+  status              String   @default("sent") // sent | viewed | accepted | declined
   sentAt              DateTime @default(now())
 }
 
@@ -214,4 +225,106 @@ model ReviewLog {
   actorId   String?
   comments  String?
   createdAt DateTime @default(now())
+}
+
+// === Phase 3 models (PRD §5.3) ===
+
+model LawyerReview {
+  id        String   @id @default(cuid())
+  lawyerId  String
+  lawyer    Lawyer   @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  userId    String?
+  rating    Int      // 1..5
+  comment   String?
+  isVerifiedUser Boolean @default(false) // PRD §5.2.4: reviews restricted to verified accounts
+  createdAt DateTime @default(now())
+}
+
+model EngagementLetter {
+  id           String    @id @default(cuid())
+  lawyerId     String
+  lawyer       Lawyer    @relation(fields: [lawyerId], references: [id])
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  caseId       String?
+  case         Case?     @relation(fields: [caseId], references: [id])
+  templateType String    // contingency | hourly_fixed
+  content      String
+  variablesJson String   // JSON of filled variables
+  signedByUser Boolean    @default(false)
+  signedByLawyer Boolean  @default(false)
+  userSignedAt DateTime?
+  lawyerSignedAt DateTime?
+  status       String    @default("draft") // draft | signed_by_user | fully_signed | voided
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model CourtFiling {
+  id           String    @id @default(cuid())
+  caseId       String
+  case         Case      @relation(fields: [caseId], references: [id])
+  filingType   String    // statement_of_claim | expert_request | appeal | enforcement
+  courtName    String?
+  content      String
+  status       String    @default("draft") // draft | lawyer_approved | filed | rejected
+  filedAt      DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model ForumTopic {
+  id           String    @id @default(cuid())
+  title        String
+  category     String    // general | insurance | medical | court | corruption | support
+  body         String
+  authorId     String?
+  authorDisplayName String? // anonymous display name if no user
+  isPinned     Boolean   @default(false)
+  isLocked     Boolean   @default(false)
+  views        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  posts        ForumPost[]
+}
+
+model ForumPost {
+  id           String    @id @default(cuid())
+  topicId      String
+  topic        ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  authorId     String?
+  authorDisplayName String?
+  body         String
+  isModeratorApproved Boolean @default(false)
+  isLawyerAnswer Boolean @default(false) // PRD §5.3.4: verified lawyer/NGO Q&A participation
+  createdAt    DateTime  @default(now())
+}
+
+model RegulatorStat {
+  // Aggregated, anonymized complaint/outcome data for the regulator dashboard (PRD §5.3.3)
+  // k-anonymity applied at the query layer — never store individual case data here
+  id           String    @id @default(cuid())
+  period       String    // e.g. "2026-Q3"
+  insurerName  String    // bucketed; small insurers grouped as "Other"
+  totalComplaints Int
+  resolvedFavorably Int
+  avgResolutionDays Float?
+  badFaithReports Int
+  createdAt    DateTime  @default(now())
+}
+
+model NotificationLog {
+  // Tracks every outbound notification (PRD §6.6) for audit + retry
+  id           String    @id @default(cuid())
+  userId       String?
+  caseId       String?
+  channel      String    // sms | whatsapp | email | in_app
+  template     String    // e.g. "reminder_police_report", "draft_approved"
+  recipient    String    // phone / email / user id
+  payload      String    // JSON of variables
+  status       String    @default("queued") // queued | sent | delivered | failed
+  providerMessageId String?
+  attempts     Int       @default(0)
+  lastError    String?
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
 }

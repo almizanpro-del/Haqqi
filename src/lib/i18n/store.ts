@@ -15,9 +15,16 @@ export type View =
   | "evidence"
   | "stories"
   | "complaints"
-  | "corruption";
+  | "corruption"
+  | "lawyers"
+  | "engagement"
+  | "court"
+  | "forum"
+  | "rag"
+  | "regulator"
+  | "notifications";
 
-export type Role = "victim" | "lawyer" | "admin";
+export type Role = "victim" | "lawyer" | "admin" | "regulator";
 
 interface AppState {
   lang: Lang;

@@ -14,6 +14,13 @@ import { EvidenceView } from "@/components/views/evidence-view";
 import { StoriesView } from "@/components/views/stories-view";
 import { ComplaintsView } from "@/components/views/complaints-view";
 import { CorruptionView } from "@/components/views/corruption-view";
+import { LawyersView } from "@/components/views/lawyers-view";
+import { EngagementView } from "@/components/views/engagement-view";
+import { CourtView } from "@/components/views/court-view";
+import { ForumView } from "@/components/views/forum-view";
+import { RagSearchView } from "@/components/views/rag-search-view";
+import { RegulatorView } from "@/components/views/regulator-view";
+import { NotificationsView } from "@/components/views/notifications-view";
 
 export default function Home() {
   const view = useAppStore((s) => s.view);
@@ -33,6 +40,13 @@ export default function Home() {
         {view === "stories" && <StoriesView />}
         {view === "complaints" && <ComplaintsView />}
         {view === "corruption" && <CorruptionView />}
+        {view === "lawyers" && <LawyersView />}
+        {view === "engagement" && <EngagementView />}
+        {view === "court" && <CourtView />}
+        {view === "forum" && <ForumView />}
+        {view === "rag" && <RagSearchView />}
+        {view === "regulator" && <RegulatorView />}
+        {view === "notifications" && <NotificationsView />}
       </main>
       <Footer />
     </div>

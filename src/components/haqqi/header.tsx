@@ -27,6 +27,12 @@ import {
   Megaphone,
   ChevronDown,
   Menu,
+  Gavel,
+  ScrollText,
+  MessageCircle,
+  Search,
+  BarChart3,
+  Bell,
 } from "lucide-react";
 
 interface NavItem {
@@ -44,11 +50,18 @@ const NAV_ITEMS: NavItem[] = [
   { view: "workflow", labelKey: "nav.workflow", icon: ListChecks, phase: 1 },
   { view: "drafting", labelKey: "nav.drafting", icon: FileText, phase: 2 },
   { view: "evidence", labelKey: "nav.evidence", icon: FolderOpen, phase: 2 },
+  { view: "rag", labelKey: "nav.rag", icon: Search, phase: 2 },
   { view: "complaints", labelKey: "nav.complaints", icon: Megaphone, phase: 1 },
+  { view: "lawyers", labelKey: "nav.lawyers", icon: Users, phase: 2 },
+  { view: "engagement", labelKey: "nav.engagement", icon: ScrollText, phase: 3 },
+  { view: "court", labelKey: "nav.court", icon: Gavel, phase: 3 },
   { view: "stories", labelKey: "nav.stories", icon: Users, phase: 1 },
+  { view: "forum", labelKey: "nav.forum", icon: MessageCircle, phase: 3 },
   { view: "corruption", labelKey: "nav.corruption", icon: ShieldAlert, phase: 2 },
   { view: "review", labelKey: "nav.review", icon: Scale, phase: 2, rolesAllowed: ["lawyer", "admin"] },
   { view: "legalContent", labelKey: "nav.legalContent", icon: BookOpen, phase: 2, rolesAllowed: ["lawyer", "admin"] },
+  { view: "regulator", labelKey: "nav.regulator", icon: BarChart3, phase: 3, rolesAllowed: ["admin", "regulator"] },
+  { view: "notifications", labelKey: "nav.notifications", icon: Bell, phase: 3, rolesAllowed: ["lawyer", "admin"] },
 ];
 
 export function Header() {
@@ -151,7 +164,7 @@ export function Header() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{t("common.role.victim" as never)}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {(["victim", "lawyer", "admin"] as Role[]).map((r) => (
+              {(["victim", "lawyer", "admin", "regulator"] as Role[]).map((r) => (
                 <DropdownMenuItem key={r} onClick={() => setRole(r)} className={cn(role === r && "bg-accent")}>
                   {t(`common.role.${r}` as never)}
                 </DropdownMenuItem>

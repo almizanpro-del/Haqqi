@@ -18,6 +18,7 @@ import {
   BookOpen,
   ScrollText,
   History,
+  FileDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -150,6 +151,30 @@ export function DraftingView() {
         variant: "destructive",
       });
     }
+  }
+
+  async function handleExportPdf(draftId: string) {
+    toast({ title: lang === "ar" ? "جارٍ توليد PDF…" : "Generating PDF…" });
+    const res = await fetch("/api/drafts/export-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ draftId, language: lang }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      toast({ title: t("draft.cannotSend"), description: err?.error ?? "", variant: "destructive" });
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `haqqi-draft-${draftId.slice(0, 8)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: lang === "ar" ? "تم تصدير PDF" : "PDF exported" });
   }
 
   const statusBadge = (status: ReviewStatus) => {
@@ -324,6 +349,17 @@ export function DraftingView() {
                       >
                         <Send className="h-3 w-3" />
                         {t("draft.send")}
+                      </Button>
+                    )}
+                    {(activeDraft.reviewStatus === "approved" || activeDraft.reviewStatus === "sent") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExportPdf(activeDraft.id)}
+                        className="gap-2"
+                      >
+                        <FileDown className="h-3 w-3" />
+                        {t("eng.pdf")}
                       </Button>
                     )}
                     {activeDraft.reviewStatus === "sent" && (
