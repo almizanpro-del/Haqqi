@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Send, RotateCcw, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Send, RotateCcw, Loader2, AlertCircle, CheckCircle2, HeartCrack, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatMessage {
@@ -30,6 +30,7 @@ export function IntakeView() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [distressDetected, setDistressDetected] = useState(false);
   const [completed, setCompleted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -100,12 +101,17 @@ export function IntakeView() {
       const reply: ChatMessage = { role: "assistant", content: data.reply };
       setMessages((prev) => [...prev, reply]);
       setStage(data.nextStage ?? stage);
+      setDistressDetected(!!data.distressDetected);
       if (data.isComplete) {
         setCompleted(true);
         toast({
           title: t("intake.completed.title"),
           description: t("intake.completed.body"),
         });
+      }
+      // Show PII redaction notice if any was applied
+      if (data.piiRedacted && data.piiRedacted > 0) {
+        console.log(`[intake] ${data.piiRedacted} PII items redacted before LLM call:`, data.piiTypes);
       }
     } catch (e) {
       console.error(e);
@@ -185,6 +191,39 @@ export function IntakeView() {
         <AlertTitle className="text-xs">{t("intake.emergency.banner")}</AlertTitle>
         <AlertDescription className="text-xs" />
       </Alert>
+
+      {/* I7: Distress / crisis escalation banner — shown when AI detects distress */}
+      {distressDetected && (
+        <Alert className="border-rose-400 bg-rose-50 dark:bg-rose-950/40">
+          <HeartCrack className="h-4 w-4 text-rose-600" />
+          <AlertTitle className="text-sm text-rose-700 dark:text-rose-300">
+            {lang === "ar" ? "أنت لست وحدك" : "You are not alone"}
+          </AlertTitle>
+          <AlertDescription className="text-xs text-rose-700/90 dark:text-rose-300/90 space-y-1.5">
+            <p>
+              {lang === "ar"
+                ? "إذا كنت تمرّ بضيق شديد أو تفكّر في إيذاء نفسك، تواصل فورًا:"
+                : "If you are in severe distress or having thoughts of self-harm, reach out immediately:"}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <a href="tel:911" className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-600 text-white text-xs font-medium hover:bg-rose-700">
+                <Phone className="h-3 w-3" /> 911
+              </a>
+              <a href="tel:111" className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-200 text-xs font-medium hover:bg-rose-200">
+                <Phone className="h-3 w-3" /> {lang === "ar" ? "الخط الساخن للصحة النفسية: 111" : "Mental Health Hotline: 111"}
+              </a>
+              <a href="tel:080022022" className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-200 text-xs font-medium hover:bg-rose-200">
+                <Phone className="h-3 w-3" /> 080022022
+              </a>
+            </div>
+            <p className="text-[10px] mt-1.5 opacity-80">
+              {lang === "ar"
+                ? "الخدمات مجانية وسرّية. المساعدة القانونية يمكن أن تنتظر — سلامتك أولاً."
+                : "Services are free and confidential. Legal help can wait — your safety comes first."}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Stage tracker */}
       <Card>

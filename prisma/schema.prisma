@@ -18,9 +18,11 @@ model User {
   language  String   @default("ar")
   name      String?
   createdAt DateTime @default(now())
-  cases     Case[]
-  drafts    Draft[]
-  engagementLetters EngagementLetter[]
+  cases              Case[]
+  drafts             Draft[]
+  engagementLetters  EngagementLetter[]
+  caseAccess         CaseAccess[]
+  consents           ConsentRecord[]
 }
 
 model Case {
@@ -43,6 +45,7 @@ model Case {
   handoffPackets      HandoffPacket[]
   courtFilings        CourtFiling[]
   engagementLetters   EngagementLetter[]
+  caseAccess          CaseAccess[]
 }
 
 model Claim {
@@ -80,6 +83,7 @@ model Evidence {
   fileUrl    String?
   note       String?
   uploadedAt DateTime @default(now())
+  hash       EvidenceHash?
 }
 
 model ClaimLog {
@@ -136,6 +140,7 @@ model Lawyer {
   reviews          LawyerReview[]
   handoffPackets   HandoffPacket[]
   engagementLetters EngagementLetter[]
+  verification     LawyerVerification?
 }
 
 model LegalRulesConfig {
@@ -327,4 +332,106 @@ model NotificationLog {
   scheduledFor DateTime?
   sentAt       DateTime?
   createdAt    DateTime  @default(now())
+}
+
+// === Gap-closure models (audit-feedback driven) ===
+
+// C1 — Multi-user case access: family members, assigned lawyer, etc.
+model CaseAccess {
+  id          String   @id @default(cuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  userId      String   // the granted user
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String   // owner | family_representative | assigned_lawyer | viewer
+  grantedBy   String?  // userId who granted access
+  grantedAt   DateTime @default(now())
+  revokedAt   DateTime?
+
+  @@unique([caseId, userId])
+}
+
+// C4 — Lawyer verification: bar ID + license upload + admin approval workflow
+model LawyerVerification {
+  id              String    @id @default(cuid())
+  lawyerId        String    @unique
+  lawyer          Lawyer    @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  barId           String    // Jordan Bar Association number
+  licenseNumber   String?
+  licenseFileUrl  String?   // uploaded scan of license (Supabase Storage in prod)
+  lawFirmName     String?
+  practiceAreas   String?   // JSON array
+  status          String    @default("pending") // pending | approved | rejected
+  reviewedByAdminId String?
+  reviewNotes     String?
+  submittedAt     DateTime  @default(now())
+  reviewedAt      DateTime?
+}
+
+// C6 — Canonical audit log: who did what, when, on what entity
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?  // userId (null = system)
+  actorRole   String?  // victim | lawyer | admin | regulator | system
+  action      String   // e.g. "draft.generated", "case.access.granted", "rag.doc.verified"
+  entityType  String   // case | draft | evidence | lawyer | legal_document | user | ...
+  entityId    String?
+  caseId      String?
+  metadata    String?  // JSON of action-specific context
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+
+// I8 — Evidence chain-of-custody: hash + immutable timestamp
+// Augments the existing Evidence model with cryptographic integrity
+// (added as separate model to preserve backward compat with existing rows)
+model EvidenceHash {
+  id           String   @id @default(cuid())
+  evidenceId   String   @unique
+  evidence     Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  sha256       String   // SHA-256 of file contents
+  fileSize     Int?
+  mimeType     String?
+  uploadedAt   DateTime @default(now()) // immutable — never updated
+  // Future: blockchain anchor / notary timestamp
+}
+
+// I9 — Consent versioning (PDPL compliance)
+model ConsentRecord {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consentType     String   // terms_of_service | privacy_policy | not_legal_advice | data_processing
+  version         String   // semantic version of the document accepted
+  documentHash    String?  // hash of the exact text accepted
+  acceptedAt      DateTime @default(now())
+  ipAddress       String?
+  userAgent       String?
+  withdrawnAt     DateTime?
+}
+
+// I11 — AI answer feedback (thumbs up/down) on intake + RAG
+model AiFeedback {
+  id          String   @id @default(cuid())
+  userId      String?
+  feature     String   // intake | rag_search | drafting
+  messageId   String?  // reference to the AI message (intake turn / RAG result / draft)
+  query       String?  // the user's input that produced the answer
+  answer      String?  // the AI's answer (truncated)
+  rating      String   // up | down
+  comment     String?
+  createdAt   DateTime @default(now())
+}
+
+// W14 — Data export / deletion request (PDPL right to be forgotten)
+model DataSubjectRequest {
+  id          String   @id @default(cuid())
+  userId      String?
+  userEmail   String?  // captured even if userId is null
+  requestType String   // export | deletion | correction
+  status      String   @default("pending") // pending | processing | completed | rejected
+  fulfillmentNote String?
+  requestedAt DateTime @default(now())
+  completedAt DateTime?
 }

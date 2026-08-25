@@ -170,6 +170,20 @@ export function DashboardView() {
         </div>
       )}
 
+      {/* C3: Calendar export — import deadlines to Google/Apple Calendar */}
+      {data.case && (
+        <div className="flex justify-end">
+          <a
+            href={`/api/cases/${data.case.id}/deadlines.ics`}
+            download
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-brand/30 text-brand hover:bg-brand/5 transition-colors"
+          >
+            <Calendar className="h-3 w-3" />
+            {lang === "ar" ? "تصدير المواعيد إلى التقويم (.ics)" : "Export deadlines to calendar (.ics)"}
+          </a>
+        </div>
+      )}
+
       {/* Case facts */}
       <Card>
         <CardHeader>

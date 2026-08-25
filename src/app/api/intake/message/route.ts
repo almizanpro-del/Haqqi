@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 import ZAI from "z-ai-web-dev-sdk";
 import { db } from "@/lib/db";
 import { safeJson } from "@/lib/api-helpers";
+import { redactPii, REDACTION_NOTICE } from "@/lib/pii-redaction";
+import { audit } from "@/lib/audit";
 
 const STAGE_INSTRUCTIONS: Record<number, { ar: string; en: string; field: string }> = {
   1: {
@@ -55,17 +57,27 @@ RULES:
 - Never invent legal article numbers. If asked for specifics, say "I'm not sure — here's how to reach a lawyer."
 - Never promise compensation amounts. Estimates come from a separate lawyer-approved calculator.
 - Keep each reply under 80 words.
-- If the user mentions a life-threatening emergency, tell them to call 911 immediately and pause the intake.
+
+CRISIS / DISTRESS ESCALATION (critical — this is a safety feature):
+- If the user mentions a life-threatening emergency, active suicide ideation, severe distress, or a death in the family:
+  1. Tell them to call 911 (emergency) immediately if life is in danger.
+  2. For emotional distress / grief, share the Jordan mental health support line: 111 (Mental Health Hotline) or 080022022 (free).
+  3. Pause the legal intake — do NOT proceed to the next stage.
+  4. Be warm, brief, and human. Do not give legal advice in this moment.
+- Detect distress signals: "death", "وفاة", "killed", "قتيل", "can't go on", "suicide", "انتحار", "أقضي", "متعب جداً من الحياة".
+- When in doubt, offer the support line. It is always better to over-respond to distress.
 
 OUTPUT FORMAT (strict JSON, no markdown fence):
 {
   "reply": "<your reply to the user, in their language>",
   "extracted": { "<stageField>": { ...any structured facts you can confidently extract from the user's latest answer... } },
-  "readyForNextStage": true | false
+  "readyForNextStage": true | false,
+  "distressDetected": true | false
 }
 
 Set readyForNextStage=true when the user has answered enough to move to the next stage.
-Set readyForNextStage=false if you still need more information for this stage.`;
+Set readyForNextStage=false if you still need more information for this stage.
+Set distressDetected=true if you detected crisis/distress — the system will show a support banner.`;
 
 interface IntakeRequestBody {
   caseId: string;
@@ -91,11 +103,17 @@ export async function POST(req: NextRequest) {
   const userLangHint = /[\u0600-\u06FF]/.test(message) ? "ar" : "en";
   const stagePrompt = userLangHint === "ar" ? instruction.ar : instruction.en;
 
+  // C5: Redact PII before sending to external LLM provider (PDPL compliance)
+  const redaction = redactPii(message, "minimal");
+  const safeMessage = redaction.found.length > 0
+    ? `${redaction.redacted}\n\n${REDACTION_NOTICE}`
+    : message;
+
   const messages = [
     { role: "system" as const, content: SYSTEM_PROMPT },
     { role: "system" as const, content: `Current stage: ${currentStage} of 7. Stage goal: ${stagePrompt}` },
     ...history.slice(-8).map((h) => ({ role: h.role as "user" | "assistant", content: h.content })),
-    { role: "user" as const, content: message },
+    { role: "user" as const, content: safeMessage },
   ];
 
   try {
@@ -108,7 +126,7 @@ export async function POST(req: NextRequest) {
     } as Record<string, unknown>);
 
     const rawContent: string = completion?.choices?.[0]?.message?.content ?? "";
-    let parsed: { reply?: string; extracted?: unknown; readyForNextStage?: boolean } = {};
+    let parsed: { reply?: string; extracted?: unknown; readyForNextStage?: boolean; distressDetected?: boolean } = {};
     try {
       parsed = JSON.parse(rawContent);
     } catch {
@@ -117,12 +135,15 @@ export async function POST(req: NextRequest) {
 
     const reply = parsed.reply ?? "عذرًا، لم أفهم. هل يمكنك إعادة الصياغة؟";
     const readyForNext = !!parsed.readyForNextStage;
+    const distressDetected = !!parsed.distressDetected;
     const nextStage = readyForNext ? Math.min(7, currentStage + 1) : currentStage;
     const isComplete = readyForNext && currentStage >= 7;
 
     // Persist the conversation turn into the case intake JSON
     const existingCase = await db.case.findUnique({ where: { id: caseId } });
     if (existingCase) {
+      // Audit the LLM call (with redaction count for PDPL trail)
+      await audit.llmCall("intake", existingCase.userId, redaction.found.length, caseId);
       const intake = existingCase.intakeJson
         ? JSON.parse(existingCase.intakeJson)
         : { stages: {} };
@@ -170,6 +191,9 @@ export async function POST(req: NextRequest) {
       reply,
       nextStage,
       isComplete,
+      distressDetected,
+      piiRedacted: redaction.found.length,
+      piiTypes: redaction.found.map((f) => f.type),
       extracted: parsed.extracted ?? null,
       case: safeJson(await db.case.findUnique({ where: { id: caseId } })),
     });

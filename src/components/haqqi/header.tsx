@@ -37,6 +37,8 @@ import {
   Shield,
   LayoutDashboard,
   Settings as SettingsIcon,
+  Inbox,
+  ShieldCheck,
 } from "lucide-react";
 
 interface NavItem {
@@ -68,6 +70,8 @@ const NAV_ITEMS: NavItem[] = [
   { view: "regulator", labelKey: "nav.regulator", icon: BarChart3, phase: 3, rolesAllowed: ["admin", "regulator"] },
   { view: "notifications", labelKey: "nav.notifications", icon: Bell, phase: 3, rolesAllowed: ["lawyer", "admin"] },
   { view: "moderation", labelKey: "nav.moderation", icon: Shield, phase: 3, rolesAllowed: ["admin"] },
+  { view: "inbox", labelKey: "nav.inbox", icon: Inbox },
+  { view: "privacy", labelKey: "nav.privacy", icon: ShieldCheck },
   { view: "settings", labelKey: "nav.settings", icon: SettingsIcon },
 ];
 

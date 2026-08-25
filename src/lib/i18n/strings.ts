@@ -32,6 +32,8 @@ export const translations = {
     "nav.moderation": "قائمة الإشراف",
     "nav.dashboard": "لوحة القضية",
     "nav.settings": "الإعدادات",
+    "nav.inbox": "صندوق الإشعارات",
+    "nav.privacy": "الخصوصية والبيانات",
 
     // Hero
     "hero.title": "افهم حقوقك. نظّم مطالبتك. لا تُخدع.",
@@ -352,6 +354,8 @@ export const translations = {
     "nav.moderation": "Moderation Queue",
     "nav.dashboard": "Case Dashboard",
     "nav.settings": "Settings",
+    "nav.inbox": "Notification Inbox",
+    "nav.privacy": "Privacy & Data",
 
     // Hero
     "hero.title": "Know your rights. Organize your claim. Don't be exploited.",

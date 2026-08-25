@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Loader2, BookOpen, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AiFeedbackButtons } from "@/components/haqqi/ai-feedback-buttons";
 
 interface SearchResult {
   document: {
@@ -184,6 +185,18 @@ export function RagSearchView() {
                           ))}
                         </div>
                       )}
+                      {/* I11: AI feedback — thumbs up/down on this RAG result */}
+                      <div className="flex items-center justify-between pt-2 border-t mt-2">
+                        <span className="text-[10px] text-muted-foreground">
+                          {lang === "ar" ? "هل هذه النتيجة مفيدة؟" : "Was this result helpful?"}
+                        </span>
+                        <AiFeedbackButtons
+                          feature="rag_search"
+                          messageId={r.document.id}
+                          query={result?.query}
+                          answer={r.document.content.slice(0, 500)}
+                        />
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

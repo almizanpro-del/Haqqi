@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getReviewerLawyer, safeJson } from "@/lib/api-helpers";
+import { audit } from "@/lib/audit";
 
 interface ReviewRequest {
   draftId: string;
@@ -50,6 +51,13 @@ export async function POST(req: NextRequest) {
       comments,
     },
   });
+
+  // C6: Canonical audit log
+  if (action === "approve") {
+    await audit.draftApproved(draftId, reviewer.id, draft.caseId ?? undefined);
+  } else {
+    await audit.draftRejected(draftId, reviewer.id, draft.caseId ?? undefined, comments);
+  }
 
   return NextResponse.json({ draft: safeJson(updated) });
 }

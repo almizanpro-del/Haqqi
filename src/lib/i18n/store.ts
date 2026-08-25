@@ -25,7 +25,9 @@ export type View =
   | "notifications"
   | "moderation"
   | "dashboard"
-  | "settings";
+  | "settings"
+  | "inbox"
+  | "privacy";
 
 export type Role = "victim" | "lawyer" | "admin" | "regulator";
 

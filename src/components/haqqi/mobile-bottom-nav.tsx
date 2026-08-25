@@ -45,6 +45,8 @@ const ALL_VIEWS: View[] = [
   "stories",
   "forum",
   "corruption",
+  "inbox",
+  "privacy",
 ];
 
 export function MobileBottomNav() {

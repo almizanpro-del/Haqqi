@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 import ZAI from "z-ai-web-dev-sdk";
 import { db } from "@/lib/db";
 import { getDemoUser, getReviewerLawyer, safeJson, parseJsonField } from "@/lib/api-helpers";
+import { redactPii } from "@/lib/pii-redaction";
+import { audit } from "@/lib/audit";
 
 interface GenerateRequest {
   caseId: string;
@@ -87,12 +89,16 @@ ${ragContext || "(no verified documents yet)"}
 
 Now produce the draft. Remember: strict JSON only, no markdown fences.`;
 
+  // C5: Redact PII from intake data before sending to LLM
+  const redaction = redactPii(userPrompt, "minimal");
+  const safePrompt = redaction.found.length > 0 ? redaction.redacted : userPrompt;
+
   try {
     const zai = await ZAI.create();
     const completion = await zai.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "user", content: safePrompt },
       ],
       temperature: 0.3,
       max_tokens: 1800,
@@ -133,6 +139,10 @@ Now produce the draft. Remember: strict JSON only, no markdown fences.`;
     await db.reviewLog.create({
       data: { draftId: draft.id, action: "generated", actorId: user.id, comments: `template=${templateType} v${template.version}` },
     });
+
+    // C6: Canonical audit log + LLM call audit (with PII redaction count)
+    await audit.draftGenerated(draft.id, caseId, user.id, templateType);
+    await audit.llmCall("drafting", user.id, redaction.found.length, caseId);
 
     return NextResponse.json({
       draft: safeJson(draft),
