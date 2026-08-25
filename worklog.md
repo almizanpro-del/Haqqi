@@ -172,3 +172,23 @@ Work Log:
 Stage Summary:
 - 1 new component (onboarding-tour.tsx), 2 modified files.
 - Lint clean.
+
+---
+Task ID: phase-7
+Agent: Super Z (main)
+Task: Global search (Cmd+K palette).
+
+Work Log:
+- Built GET /api/search endpoint that searches across RAG legal docs, user's drafts, approved stories, forum topics, and verified lawyers in parallel.
+- Built GlobalSearch component with Cmd+K / Ctrl+K keyboard shortcut to open.
+- Categorized results with icons and counts per category.
+- Keyboard navigation: ↑/↓ to move, Enter to select, ESC to close.
+- Debounced search (250ms) for performance.
+- Click result navigates to the relevant view.
+- Fixed runtime error (TYPE_META lookup for 'drafts' vs 'draft').
+- Browser-verified: search 'تعويض' returns 9 results across 3 categories.
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 2 new files (search API, global-search component), 2 modified.
+- Lint clean.
