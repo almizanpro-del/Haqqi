@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { LanguageToggle } from "./language-toggle";
+import { GlobalSearch } from "./global-search";
 import {
   Home,
   MessageSquare,
@@ -158,6 +159,7 @@ export function Header() {
 
         {/* Role + language */}
         <div className="flex items-center gap-2 shrink-0">
+          <GlobalSearch />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">

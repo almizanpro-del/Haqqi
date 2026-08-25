@@ -154,3 +154,21 @@ Stage Summary:
 - 1 new component (mobile-bottom-nav.tsx), 2 modified files.
 - Mobile UX significantly improved — thumb-reachable primary nav.
 - Lint clean.
+
+---
+Task ID: phase-6-onboarding
+Agent: Super Z (main)
+Task: Onboarding tour for first-time users.
+
+Work Log:
+- Built OnboardingTour component with 6 steps covering all major features.
+- Auto-shows on first visit via localStorage flag (haqqi-onboarding-completed).
+- Progress dots (clickable for direct navigation).
+- Skip + Next/Get started buttons. 'Get started' navigates to AI Intake.
+- Added 'Restart onboarding tour' button in Settings.
+- Browser-verified: tour shows, navigates, completes, navigates to intake.
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 1 new component (onboarding-tour.tsx), 2 modified files.
+- Lint clean.
