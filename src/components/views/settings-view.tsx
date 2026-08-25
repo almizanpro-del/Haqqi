@@ -203,10 +203,28 @@ export function SettingsView() {
               : "Clear all local data (language, role, active case). Does not delete server data."}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button variant="outline" onClick={handleReset} className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/5">
+        <CardContent className="space-y-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("haqqi-onboarding-completed");
+                toast({ title: lang === "ar" ? "ستظهر الجولة عند التحديث" : "Tour will show on reload" });
+                setTimeout(() => window.location.reload(), 1000);
+              }
+            }}
+            className="gap-2 text-xs"
+          >
             <RotateCcw className="h-4 w-4" />
-            {lang === "ar" ? "إعادة تعيين البيانات المحلية" : "Reset local data"}
+            {lang === "ar" ? "إعادة تشغيل جولة التعريف" : "Restart onboarding tour"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 w-full"
+          >
+            <RotateCcw className="h-4 w-4" />
+            {lang === "ar" ? "إعادة تعيين كل البيانات المحلية" : "Reset all local data"}
           </Button>
         </CardContent>
       </Card>

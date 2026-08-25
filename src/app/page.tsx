@@ -25,6 +25,7 @@ import { ModerationView } from "@/components/views/moderation-view";
 import { DashboardView } from "@/components/views/dashboard-view";
 import { SettingsView } from "@/components/views/settings-view";
 import { MobileBottomNav } from "@/components/haqqi/mobile-bottom-nav";
+import { OnboardingTour } from "@/components/haqqi/onboarding-tour";
 
 export default function Home() {
   const view = useAppStore((s) => s.view);
@@ -57,6 +58,7 @@ export default function Home() {
       </main>
       <Footer />
       <MobileBottomNav />
+      <OnboardingTour />
     </div>
   );
 }

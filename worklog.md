@@ -135,3 +135,22 @@ Stage Summary:
 - App is now PWA-installable.
 - Lint clean.
 - Repo: https://github.com/almizanpro-del/Haqqi (Phase 6 commit pushed)
+
+---
+Task ID: phase-6-mobile
+Agent: Super Z (main)
+Task: Mobile bottom navigation bar.
+
+Work Log:
+- Built MobileBottomNav component with 5 primary items (Home, Dashboard, Intake, Calculator, Drafting) + More button.
+- More button opens a bottom Sheet with all secondary views in a 3-column grid.
+- Role-aware: shows Review/Legal Content/Notifications for lawyer/admin, Moderation for admin, Regulator for admin/regulator.
+- Used CSS-only approach (lg:hidden) instead of JS window check for SSR safety.
+- Added pb-24 lg:pb-8 to main to prevent content being hidden behind the fixed bottom nav.
+- Browser-verified at 375px viewport (iPhone X size): primary nav + More sheet both work.
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 1 new component (mobile-bottom-nav.tsx), 2 modified files.
+- Mobile UX significantly improved — thumb-reachable primary nav.
+- Lint clean.
