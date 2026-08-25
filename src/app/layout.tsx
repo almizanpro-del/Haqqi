@@ -42,6 +42,12 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Haqqi" }],
   icons: { icon: "/logo.svg" },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Haqqi",
+    statusBarStyle: "default",
+  },
   openGraph: {
     title: "Haqqi — حقي",
     description: "Your Rights After a Car Accident in Jordan",

@@ -179,6 +179,83 @@ export const LEGAL_DOCUMENTS_SEED = [
     contentEn:
       "Consumers have the right to file a complaint with the Central Bank of Jordan against an insurer in cases of: unjustified delay in payment, unjustified denial, or lowball offers without basis. The Bank must respond within 30 days.",
   },
+  {
+    titleAr: "قانون حماية البيانات الشخصية الأردني",
+    titleEn: "Jordan Personal Data Protection Law",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-PDPL-3",
+    topics: ["data_protection", "privacy", "consent"],
+    contentAr:
+      "تلتزم الجهات بمعالجة البيانات الشخصية بشفافية وبناءً على موافقة صريحة من صاحب البيان. يحق للمستخدم طلب الوصول إلى بياناته، تصحيحها، أو حذفها. تخزين البيانات الحساسة (الصحة، المعتقدات) يتطلب موافقة كتابية صريحة.",
+    contentEn:
+      "Entities must process personal data transparently and based on explicit consent from the data subject. Users have the right to access, correct, or delete their data. Storage of sensitive data (health, beliefs) requires explicit written consent.",
+  },
+  {
+    titleAr: "نظام التأمين الإلزامي — تحديد قيمة التعويض",
+    titleEn: "Compulsory Insurance Regulation — Compensation Valuation",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-CML-12",
+    topics: ["compensation", "valuation", "expert"],
+    contentAr:
+      "تُحدَّد قيمة التعويض عن أضرار المركبة بناءً على تقرير خبير معتمد من شركة التأمين. في حال خلاف على التقدير، يحق للمؤمَّن له طلب تعيين خبير آخر، أو اللجوء إلى المحكمة لتعيين خبير قضائي. لا يجوز لشركة التأمين فرض تقديرها دون مستند معتمد.",
+    contentEn:
+      "Vehicle damage compensation is determined based on a report by an expert accredited by the insurer. In case of disagreement on the valuation, the insured has the right to request another expert, or resort to the court to appoint a judicial expert. The insurer may not impose its valuation without an accredited document.",
+  },
+  {
+    titleAr: "قانون أصول المحاكمات المدنية — مهلة التقادم",
+    titleEn: "Civil Procedure Code — Statute of Limitations",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-CPC-118",
+    topics: ["statute_of_limitations", "deadline", "court"],
+    contentAr:
+      "تسقط الدعوى بمضي ثلاث سنوات من تاريخ الحادث في قضايا التعويض عن الأضرار الناشئة عن حوادث السير. تبدأ المهلة من تاريخ وقوع الحادث، ولا يجوز وقفها إلا بأسباب قانونية محددة. في حالات القاصرين، قد تُمدّ المهلة.",
+    contentEn:
+      "A claim lapses after three years from the date of the accident in compensation cases for damages arising from car accidents. The period begins from the date of the accident and may only be suspended for specific legal reasons. For minors, the period may be extended.",
+  },
+  {
+    titleAr: "القانون المدني — الضرر الأدبي",
+    titleEn: "Civil Code — Moral Damages",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-CIV-267",
+    topics: ["moral_damages", "compensation", "civil"],
+    contentAr:
+      "يشمل التعويض الضرر الأدبي الذي يلحق المتضرر من الألم الجسدي والنفسي، فقدان متعة الحياة، والأضرار المعنوية. يُقدّر القاضي هذا التعويض وفق جسامة الضرر ومدى تأثيره على حياة المتضرر. لا يشترط إثبات مادي للضرر الأدبي.",
+    contentEn:
+      "Compensation includes moral damages suffered by the victim from physical and psychological pain, loss of enjoyment of life, and moral harm. The judge estimates this compensation based on the severity of the harm and its impact on the victim's life. Material proof of moral damages is not required.",
+  },
+  {
+    titleAr: "صندوق تعويض ضحايا حوادث السير — إجراءات التقديم",
+    titleEn: "Motor Accidents Compensation Fund — Application Procedures",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-MACF-7",
+    topics: ["compensation_fund", "procedures", "documents"],
+    contentAr:
+      "يتقدم المتضرر بطلب للصندوق مشفوعًا بـ: محضر الشرطة، التقرير الطبي، صورة عن هوية المتضرر، وبيان بالأضرار. يدرس الصندوق الطلب خلال ٦٠ يومًا ويصدر قراره بالتعويض أو الرفض مع التعليل. يحق للمتضرر الطعن في القرار أمام المحكمة.",
+    contentEn:
+      "The victim submits an application to the Fund accompanied by: police report, medical report, copy of victim's ID, and statement of damages. The Fund reviews the application within 60 days and issues its decision to compensate or reject with reasoning. The victim has the right to appeal the decision in court.",
+  },
+  {
+    titleAr: "تعليمات التأمين الإلزامي — مهلة التبليغ",
+    titleEn: "Compulsory Insurance Instructions — Notification Period",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-CML-5",
+    topics: ["notification", "deadline", "insurer"],
+    contentAr:
+      "يجب على المؤمَّن له تبليغ شركة التأمين عن الحادث خلال ٣٠ يومًا من تاريخ وقوعه. التأخير في التبليغ دون عذر مقبول قد يؤدي إلى رفض المطالبة. يُفضّل التبليغ كتابةً مع الاحتفاظ بنسخة موقّعة باستلام من الشركة.",
+    contentEn:
+      "The insured must notify the insurance company of the accident within 30 days of its occurrence. Delay in notification without acceptable excuse may lead to claim denial. Written notification is preferred, retaining a copy signed as received by the company.",
+  },
+  {
+    titleAr: "قانون العمل الأردني — تعويض إصابات العمل أثناء القيادة",
+    titleEn: "Jordan Labor Law — Work Injury Compensation While Driving",
+    source: "placeholder",
+    articleId: "PLACEHOLDER-LAB-32",
+    topics: ["work_injury", "compensation", "labor"],
+    contentAr:
+      "إذا وقع حادث السير أثناء تأدية العمل، يُعتبر إصابة عمل ويحق للموظف التعويض من التأمين الإلزامي ومن التأمين على إصابات العمل معًا. لا يجوز لشركة التأمين التخفيض من التعويض بحجة وجود مصدر آخر للتعويض.",
+    contentEn:
+      "If a car accident occurs during work performance, it is considered a work injury and the employee is entitled to compensation from compulsory insurance and work injury insurance together. The insurer may not reduce compensation on the grounds of another source of compensation.",
+  },
 ];
 
 // Initial document templates (PRD §6.2 — `legal_templates` table)

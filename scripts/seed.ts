@@ -73,7 +73,8 @@ async function main() {
     const d = LEGAL_DOCUMENTS_SEED[i];
     const exists = await db.legalDocument.findFirst({ where: { articleId: d.articleId } });
     if (exists) continue;
-    const verified = i < 3; // first 3 verified, last 2 pending — to demo the gate
+    // Verify the first 8 so the RAG corpus has meaningful content; leave the rest pending
+    const verified = i < 8;
     await db.legalDocument.create({
       data: {
         title: d.titleAr,

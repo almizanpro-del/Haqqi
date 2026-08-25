@@ -1,0 +1,41 @@
+{
+  "name": "Haqqi — حقي",
+  "short_name": "Haqqi",
+  "description": "Your Rights After a Car Accident in Jordan",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#147a8c",
+  "categories": ["legal", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI Intake",
+      "short_name": "Intake",
+      "description": "Start the 7-stage AI intake conversation",
+      "url": "/?view=intake"
+    },
+    {
+      "name": "Rights Calculator",
+      "short_name": "Calculator",
+      "description": "Estimate your compensation range",
+      "url": "/?view=calculator"
+    },
+    {
+      "name": "Case Dashboard",
+      "short_name": "Dashboard",
+      "description": "Overview of your active case",
+      "url": "/?view=dashboard"
+    }
+  ]
+}

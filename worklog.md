@@ -94,3 +94,22 @@ Stage Summary:
 - 11 new/modified files, 4 new API routes, 1 new view component.
 - Lint clean.
 - Repo: https://github.com/almizanpro-del/Haqqi (Phase 4 commit pushed)
+
+---
+Task ID: phase-5
+Agent: Super Z (main)
+Task: Continue developing — Case Dashboard, Arabic PDF font embedding, Settings page.
+
+Work Log:
+- Built Case Dashboard with deadline countdowns (insurer/CBJ/statute), bad-faith pattern auto-detection, document checklist progress, drafts summary, recent interactions, quick-link cards.
+- GET /api/cases/[id]/dashboard aggregates everything in one call.
+- Embedded DejaVu Sans (165 Arabic glyphs) into jsPDF for proper Arabic rendering in PDF export. PDF size grew from 8KB to 309KB. RTL line reversal + right-alignment.
+- Built Settings page with language selector, role selector, theme info, about, reset.
+- Added 'Case Dashboard' button to home hero (visible when activeCaseId set).
+- Browser-verified: dashboard with CRITICAL deadline badge, settings page with all options, PDF export with embedded font.
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 11 new/modified files, 5 new files (dashboard-view, settings-view, dashboard API, 2 fonts).
+- Lint clean.
+- Repo: https://github.com/almizanpro-del/Haqqi (Phase 5 commit pushed)
