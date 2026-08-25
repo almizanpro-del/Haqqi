@@ -113,3 +113,25 @@ Stage Summary:
 - 11 new/modified files, 5 new files (dashboard-view, settings-view, dashboard API, 2 fonts).
 - Lint clean.
 - Repo: https://github.com/almizanpro-del/Haqqi (Phase 5 commit pushed)
+
+---
+Task ID: phase-6
+Agent: Super Z (main)
+Task: Continue developing — PWA manifest, enriched RAG corpus.
+
+Work Log:
+- Created public/manifest.json with name, shortcuts (Intake/Calculator/Dashboard), theme color, RTL direction.
+- Linked manifest in layout.tsx metadata + appleWebApp config. App is now installable.
+- Added 7 new legal documents to LEGAL_DOCUMENTS_SEED (PDPL-3, CML-12, CPC-118, CIV-267, MACF-7, CML-5, LAB-32). Total corpus: 12 documents.
+- Updated seed script to verify first 8 (was first 3).
+- Added scripts/verify-all-docs.ts to verify all remaining pending docs.
+- All 12 documents now verified and searchable in RAG.
+- Browser-verified: search for 'تعويض الضرر الأدبي' returns 5 results, top score 5.49 (CIV-267).
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 6 new/modified files, 2 new (manifest.json, verify-all-docs.ts).
+- RAG corpus grew from 5 → 12 documents (140% increase).
+- App is now PWA-installable.
+- Lint clean.
+- Repo: https://github.com/almizanpro-del/Haqqi (Phase 6 commit pushed)
