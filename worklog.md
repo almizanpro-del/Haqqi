@@ -75,3 +75,22 @@ Stage Summary:
 - 4 roles (victim/lawyer/admin/regulator) with view gating.
 - Hard enforcement of §7.1 lawyer review workflow across drafting, handoff, and PDF export.
 - Repo: https://github.com/almizanpro-del/Haqqi (3+ Phase 3 commits pushed)
+
+---
+Task ID: phase-4
+Agent: Super Z (main)
+Task: Continue developing — anti-corruption education, moderation queue, draft editing.
+
+Work Log:
+- Built 4-section anti-corruption education module (claim-buying, brokers, bribery, misrepresentation) with warning signs + what-to-do steps + official Jordanian reporting channels.
+- Enhanced CorruptionView with tabbed Education/Report UI.
+- Built unified admin Moderation queue (stories + forum posts + corruption reports) with stats cards and approve/reject actions.
+- Added draft inline editing (only allowed when status=pending_review, audit-logged).
+- Added 'moderation' view + 'admin'-only role gating in header.
+- Browser-verified: corruption education rendering, moderation queue stats, draft edit+save flow.
+- Committed and pushed to GitHub.
+
+Stage Summary:
+- 11 new/modified files, 4 new API routes, 1 new view component.
+- Lint clean.
+- Repo: https://github.com/almizanpro-del/Haqqi (Phase 4 commit pushed)
