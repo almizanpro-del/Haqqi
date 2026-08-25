@@ -18,7 +18,7 @@ Built per **PRD v3.0 — Technical / Development-Ready**.
 | --- | --- | --- |
 | **Phase 1** — Core Self-Help | ✅ Implemented | AI Intake, Rights Calculator, Workflow Timeline, Complaints Directory, Anonymous Stories |
 | **Phase 2** — Drafting & Case Management | ✅ Implemented | Drafting Mode, RAG UI, Evidence Organizer, Lawyer Review Queue, Legal Content Mgmt, Corruption Reporting |
-| **Phase 3** — Litigation & Ecosystem | 🚧 In progress | Court Procedure Guidance, Lawyer Nomination & Engagement Letters, Regulator Dashboard, Community Forum |
+| **Phase 3** — Litigation & Ecosystem | ✅ Implemented | Lawyer Directory + Handoff, Engagement Letters, Court Procedure, Community Forum, Regulator Dashboard, Notifications, PDF Export, Hybrid RAG Search |
 
 ---
 

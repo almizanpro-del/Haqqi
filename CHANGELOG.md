@@ -6,15 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added (Phase 3 — in progress)
-- Lawyer Directory + Handoff Packets (PRD §5.2.4)
-- Engagement Letters module with e-signature (PRD §5.3.2 + Appendix A)
-- Court Procedure Guidance Module (PRD §5.3.1)
-- RTL Arabic PDF export for approved drafts (PRD §5.1.3, §9.2)
-- Hybrid RAG retrieval (BM25 + vector) (PRD §6.5, §9.3)
-- Community Forum stub (PRD §5.3.4)
-- Regulator Dashboard stub (PRD §5.3.3)
-- Notification layer with SMS/WhatsApp/email abstraction (PRD §6.6)
+### Added (Phase 3 — implemented 2026-08-25)
+- **Lawyer Directory + Handoff Packets** (PRD §5.2.4) — searchable directory with filters (location, language, fee model, expertise), reviews from verified users, one-click handoff packet (enforces §7.1: only approved drafts can be included).
+- **Engagement Letters** (PRD §5.3.2 + Appendix A) — 4 templates (contingency/hourly × AR/EN), template-filling via API, dual e-signature workflow (client + lawyer) per Electronic Transactions Law.
+- **Court Procedure Guidance** (PRD §5.3.1) — 5 procedural step sections (pre-filing, statement of claim, service, expert pathway, enforcement) + court filings API.
+- **RTL Arabic PDF Export** (PRD §5.1.3, §9.2) — jsPDF-based generator with brand header, metadata, page numbers, hard-enforced: only approved/sent drafts can be exported.
+- **Hybrid RAG Retrieval** (PRD §6.5, §9.3) — BM25-like scoring + topic boost + article-ID exact-match boost, confidence threshold with "refer to lawyer" fallback per §6.4 guardrails.
+- **Notification Layer** (PRD §6.6) — abstracted `sendNotification()` interface, 8 templates (reminders, draft_approved/rejected, handoff, forum), audit log with attempts + provider message IDs.
+- **Community Forum** (PRD §5.3.4) — topics + posts with 6 categories, verified lawyer Q&A badge, moderation queue.
+- **Regulator Dashboard** (PRD §5.3.3) — aggregated, anonymized data with k-anonymity (k≥5), per-insurer breakdown + totals, role-based access (admin/regulator only).
+- **Regulator role** added to role switcher (victim/lawyer/admin/regulator).
+- **7 new Prisma models**: LawyerReview, EngagementLetter, CourtFiling, ForumTopic, ForumPost, RegulatorStat, NotificationLog.
+- **Forum seed script** (`scripts/seed-forum.ts`) — 5 sample topics + 3 lawyer replies + 2 regulator stats.
+- **150+ new translation keys** (AR/EN) for all new views.
+
+### Changed
+- Extended Prisma schema with 7 new models and updated relations on User, Case, Lawyer.
+- Updated header navigation with 7 new nav items, role gating for admin/regulator-only views.
+- Updated Drafting view with "Export PDF" button (visible when status is approved/sent).
+- Updated Regulator Stats endpoint to use the new RegulatorStat materialized table.
 
 ## [0.1.0] — 2026-08-25
 
