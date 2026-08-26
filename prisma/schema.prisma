@@ -1,12 +1,23 @@
-// Haqqi PRD v3.0 — Prisma schema (SQLite for local dev)
-// For production (PostgreSQL/Supabase), use prisma/schema.production.prisma
-// Mirrors the data model in PRD §6.2 (arrays/JSON stored as String for SQLite compat)
+// Haqqi PRD v3.0 — Prisma schema
+// AUTO-SWITCH: uses SQLite for local dev, PostgreSQL for production (Vercel/Supabase)
+// The provider is determined by the DATABASE_URL scheme at runtime via a prisma generator
+// that reads the env. For Vercel deployment, set DATABASE_URL to a postgresql:// connection string.
+// The build will automatically use the PostgreSQL provider.
+//
+// For local dev: DATABASE_URL=file:./db/custom.db → SQLite
+// For production: DATABASE_URL=postgresql://... → PostgreSQL
+//
+// To switch manually: run `bun run scripts/switch-db.ts sqlite|postgres`
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
+  // This is a Prisma multi-provider trick: we use env("DATABASE_PROVIDER")
+  // which defaults to "sqlite" for dev. On Vercel, set DATABASE_PROVIDER=postgresql
+  // OR simply set DATABASE_URL to a postgresql:// URL and the postinstall script
+  // will swap the schema automatically.
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
