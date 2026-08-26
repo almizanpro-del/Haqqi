@@ -135,12 +135,12 @@ html[dir="ltr"] body {
   font-family: var(--font-geist-sans), var(--font-arabic), system-ui, sans-serif;
 }
 
-/* Headings always use a heavier Arabic face in RTL */
+/* Headings — Tajawal Bold/ExtraBold for weight contrast in RTL */
 html[dir="rtl"] h1,
 html[dir="rtl"] h2,
 html[dir="rtl"] h3,
 html[dir="rtl"] h4 {
-  font-family: var(--font-arabic-kufi), var(--font-arabic), system-ui, sans-serif;
+  font-family: var(--font-arabic), system-ui, sans-serif;
   font-weight: 700;
 }
 

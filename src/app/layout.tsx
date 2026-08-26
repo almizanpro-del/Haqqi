@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_Arabic, Noto_Kufi_Arabic } from "next/font/google";
+import { Geist, Geist_Mono, Tajawal } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from "@/components/app-provider";
@@ -14,16 +14,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const notoArabic = Noto_Sans_Arabic({
+// Tajawal — clean modern Arabic typeface by Boutros International
+// Used for both body and headings in RTL (replaces Noto Sans Arabic + Noto Kufi)
+const tajawal = Tajawal({
   variable: "--font-arabic",
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const notoKufi = Noto_Kufi_Arabic({
-  variable: "--font-arabic-kufi",
-  subsets: ["arabic"],
-  weight: ["600", "700", "800"],
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -62,7 +58,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoArabic.variable} ${notoKufi.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${tajawal.variable} antialiased bg-background text-foreground`}
       >
         <AppProvider>{children}</AppProvider>
         <Toaster />
