@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const created = await db.legalRulesConfig.create({
     data: {
       version: newVersion,
-      rulesJson: rulesJson,
+      rulesJson: typeof rulesJson === "string" ? rulesJson : JSON.stringify(rulesJson),
       isActive: false, // requires approval (PRD §7.2)
     },
   });

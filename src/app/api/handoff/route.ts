@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
     data: {
       caseId,
       lawyerId,
-      includedDocumentIds: includedDocumentIds,
-      includedDraftIds: includedDraftIds,
+      includedDocumentIds: JSON.stringify(includedDocumentIds),
+      includedDraftIds: JSON.stringify(includedDraftIds),
       message: message ?? null,
       status: "sent",
       sentAt: new Date(),
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       channel: "email",
       template: "handoff_sent_to_lawyer",
       recipient: lawyer.contactEmail ?? "unknown",
-      payload: { lawyerName: lawyer.name, caseId, packetId: packet.id } as any,
+      payload: JSON.stringify({ lawyerName: lawyer.name, caseId, packetId: packet.id }),
       status: "queued",
     },
   });

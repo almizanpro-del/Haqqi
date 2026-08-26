@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           barId, licenseNumber: licenseNumber ?? null,
           licenseFileUrl: licenseFileUrl ?? null,
           lawFirmName: lawFirmName ?? null,
-          practiceAreas: practiceAreas ?? null,
+          practiceAreas: practiceAreas ? JSON.stringify(practiceAreas) : null,
           status: "pending",
           reviewedByAdminId: null,
           reviewNotes: null,
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           licenseNumber: licenseNumber ?? null,
           licenseFileUrl: licenseFileUrl ?? null,
           lawFirmName: lawFirmName ?? null,
-          practiceAreas: practiceAreas ?? null,
+          practiceAreas: practiceAreas ? JSON.stringify(practiceAreas) : null,
           status: "pending",
         },
       });

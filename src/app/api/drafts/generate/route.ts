@@ -130,7 +130,7 @@ Now produce the draft. Remember: strict JSON only, no markdown fences.`;
         content: parsed.content ?? "",
         plainArabicVersion: plainArabic ? (parsed.content ?? "") : null,
         legalArabicVersion: !plainArabic ? (parsed.content ?? "") : null,
-        citations: parsed.citations ?? [],
+        citations: JSON.stringify(parsed.citations ?? []),
         reviewStatus: "pending_review",
       },
     });

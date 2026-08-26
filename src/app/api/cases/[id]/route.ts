@@ -9,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const data: Record<string, unknown> = {};
   if (typeof body.stage === "number") data.stage = body.stage;
   if (typeof body.completed === "boolean") data.completed = body.completed;
-  if (body.intakeJson !== undefined) data.intakeJson = body.intakeJson as any;
+  if (body.intakeJson !== undefined) data.intakeJson = JSON.stringify(body.intakeJson);
   if (body.accidentDate) data.accidentDate = new Date(body.accidentDate);
   if (typeof body.location === "string") data.location = body.location;
   if (typeof body.accidentType === "string") data.accidentType = body.accidentType;

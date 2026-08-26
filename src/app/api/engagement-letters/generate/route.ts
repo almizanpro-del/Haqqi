@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       caseId: caseId ?? null,
       templateType,
       content: filled,
-      variablesJson: mergedVars,
+      variablesJson: JSON.stringify(mergedVars),
       status: "draft",
     },
   });

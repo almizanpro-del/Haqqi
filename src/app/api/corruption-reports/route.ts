@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     data: {
       description,
       location: location ?? null,
-      evidenceUrls: evidenceUrls,
+      evidenceUrls: JSON.stringify(evidenceUrls),
       isAnonymous: true, // always anonymous per PRD §5.2.5
     },
   });

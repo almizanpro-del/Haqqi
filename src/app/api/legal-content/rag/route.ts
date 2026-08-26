@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       content,
       source: source ?? null,
       articleId: articleId ?? null,
-      topics: topics ?? [],
+      topics: JSON.stringify(topics ?? []),
       language,
       lawyerVerified: false,
     },

@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 
     let rules: { deadlines: { statuteOfLimitationsDays: number; insurerResponseDays: number; cbjComplaintWindowDays: number } };
     try {
-      rules = typeof rulesRow.rulesJson === "string" ? JSON.parse(rulesRow.rulesJson) : rulesRow.rulesJson as typeof rules;
+      rules = JSON.parse(rulesRow.rulesJson as string);
     } catch {
       continue;
     }
