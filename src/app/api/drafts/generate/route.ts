@@ -8,6 +8,8 @@ import { db } from "@/lib/db";
 import { getDemoUser, getReviewerLawyer, safeJson, parseJsonField } from "@/lib/api-helpers";
 import { redactPii } from "@/lib/pii-redaction";
 import { audit } from "@/lib/audit";
+import { events } from "@/lib/events";
+import { checkRateLimit, getClientIdentifier, sanitizeForLlm } from "@/lib/rate-limit";
 
 interface GenerateRequest {
   caseId: string;
@@ -30,6 +32,16 @@ export async function POST(req: NextRequest) {
   const { caseId, templateType, plainArabic = true } = body;
   if (!caseId || !templateType) {
     return NextResponse.json({ error: "caseId and templateType required" }, { status: 400 });
+  }
+
+  // v3.2 §6.8: Rate limiting
+  const clientId = getClientIdentifier(req);
+  const rateLimit = checkRateLimit(clientId, "drafts_generate");
+  if (!rateLimit.allowed) {
+    return NextResponse.json({
+      error: "rate_limit_exceeded",
+      message: "لقد وصلت إلى الحد الأقصى من عمليات الصياغة. حاول مرة أخرى بعد ساعة.",
+    }, { status: 429 });
   }
 
   const caseRow = await db.case.findUnique({ where: { id: caseId } });
@@ -142,6 +154,7 @@ Now produce the draft. Remember: strict JSON only, no markdown fences.`;
 
     // C6: Canonical audit log + LLM call audit (with PII redaction count)
     await audit.draftGenerated(draft.id, caseId, user.id, templateType);
+    await events.draftGenerated(user.id, caseId, templateType, draft.id);
     await audit.llmCall("drafting", user.id, redaction.found.length, caseId);
 
     return NextResponse.json({

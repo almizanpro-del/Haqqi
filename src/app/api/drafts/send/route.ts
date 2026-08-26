@@ -3,6 +3,7 @@
 // only settable if review_status = 'approved' (PRD §7.1)
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { events } from "@/lib/events";
 import { getDemoUser, safeJson } from "@/lib/api-helpers";
 
 export async function POST(req: NextRequest) {
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
   });
 
   const user = await getDemoUser();
+    await events.draftSent(user.id, draft.caseId ?? undefined, draftId);
   await db.reviewLog.create({
     data: { draftId, action: "sent", actorId: user.id },
   });

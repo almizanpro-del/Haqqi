@@ -24,6 +24,7 @@ model User {
   engagementLetters  EngagementLetter[]
   caseAccess         CaseAccess[]
   consents           ConsentRecord[]
+  notifications      Notification[]
 }
 
 model Case {
@@ -33,6 +34,7 @@ model Case {
   intakeJson          String       // JSON — output of AI intake (7 stages)
   stage               Int         @default(0) // current intake stage (0..7)
   completed           Boolean     @default(false)
+  status              String      @default("active") // active | settled | closed | archived (v3.2 §5.10)
   accidentDate        DateTime?
   location            String?
   accidentType        String?
@@ -47,6 +49,9 @@ model Case {
   courtFilings        CourtFiling[]
   engagementLetters   EngagementLetter[]
   caseAccess          CaseAccess[]
+  statusHistory       CaseStatusHistory[]
+  deadlines           CaseDeadline[]
+  notifications       Notification[]
 }
 
 model Claim {
@@ -438,8 +443,83 @@ model DataSubjectRequest {
   userId      String?
   userEmail   String?  // captured even if userId is null
   requestType String   // export | deletion | correction
-  status      String   @default("pending") // pending | processing | completed | rejected
+  status      String   @default("pending") // pending | in_progress | fulfilled | rejected
   fulfillmentNote String?
+  fulfilledBy String?  // admin userId who fulfilled
   requestedAt DateTime @default(now())
-  completedAt DateTime?
+  fulfilledAt DateTime?
+}
+
+// === v3.2 NEW MODELS ===
+
+// 5.10 — Case lifecycle status history
+model CaseStatusHistory {
+  id          String   @id @default(cuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  oldStatus   String?
+  newStatus   String   // active | settled | closed | archived
+  changedBy   String?  // userId
+  reason      String?
+  createdAt   DateTime @default(now())
+}
+
+// 5.1.2b — Case deadlines (hard legal deadlines, separate from workflow tasks)
+model CaseDeadline {
+  id                  String   @id @default(cuid())
+  caseId              String
+  case                Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  deadlineType        String   // insurer_response | cbj_complaint | statute_of_limitations | custom
+  dueDate             DateTime
+  sourceRulesConfigId String?  // which legal_rules_config version generated this
+  status              String   @default("upcoming") // upcoming | met | missed
+  reminderSentAt      DateTime?
+  createdAt           DateTime @default(now())
+}
+
+// 5.5 — Lawyer applications (separate from live lawyers table, per v3.2 §5.5)
+model LawyerApplication {
+  id                  String   @id @default(cuid())
+  applicantUserId     String?
+  applicantName       String
+  applicantEmail      String
+  barLicenseNumber    String
+  licenseDocumentUrl  String
+  firm                String?
+  location            String?
+  languages           String   // JSON array
+  expertise           String   // JSON array
+  status              String   @default("pending") // pending | approved | rejected
+  reviewedBy          String?  // admin userId
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  resultingLawyerId   String?  // links to lawyers table once approved
+  createdAt           DateTime @default(now())
+}
+
+// 5.6 — In-app notifications (user-facing feed with is_read)
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caseId      String?
+  case        Case?    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  eventType   String   // draft_approved | draft_rejected | deadline_warning | handoff_sent | etc.
+  message     String
+  isRead      Boolean  @default(false)
+  metadata    String?  // JSON
+  createdAt   DateTime @default(now())
+}
+
+// 9.8 — Golden test set for legal-content regression testing
+model GoldenTest {
+  id              String   @id @default(cuid())
+  testType        String   // calculator | rag_search
+  inputQuery      String   // the input (case facts for calculator, query for RAG)
+  expectedOutput  String   // JSON: expected categories for calculator, expected article_ids for RAG
+  lastRunAt       DateTime?
+  lastPassed      Boolean?
+  lastResult      String?  // JSON of actual output on last run
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
 }

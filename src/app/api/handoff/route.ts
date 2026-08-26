@@ -2,6 +2,7 @@
 // Shares case intake, documents, claim log, and lawyer-approved drafts.
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { events } from "@/lib/events";
 import { getDemoUser, safeJson } from "@/lib/api-helpers";
 
 interface HandoffRequest {

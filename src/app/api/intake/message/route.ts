@@ -9,6 +9,8 @@ import { db } from "@/lib/db";
 import { safeJson } from "@/lib/api-helpers";
 import { redactPii, REDACTION_NOTICE } from "@/lib/pii-redaction";
 import { audit } from "@/lib/audit";
+import { events } from "@/lib/events";
+import { checkRateLimit, getClientIdentifier, sanitizeForLlm, detectPromptInjection } from "@/lib/rate-limit";
 
 const STAGE_INSTRUCTIONS: Record<number, { ar: string; en: string; field: string }> = {
   1: {
@@ -94,10 +96,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "caseId and message are required" }, { status: 400 });
   }
 
+  // v3.2 §6.8: Rate limiting
+  const clientId = getClientIdentifier(req);
+  const rateLimit = checkRateLimit(clientId, "intake_message");
+  if (!rateLimit.allowed) {
+    return NextResponse.json({
+      error: "rate_limit_exceeded",
+      message: "لقد وصلت إلى الحد الأقصى من الرسائل. حاول مرة أخرى بعد ساعة.",
+      resetAt: rateLimit.resetAt,
+    }, { status: 429, headers: { "X-RateLimit-Remaining": "0", "X-RateLimit-Reset": String(rateLimit.resetAt) } });
+  }
+
+  // v3.2 §6.8: Prompt-injection defense
+  const injectionCheck = detectPromptInjection(message);
+  if (injectionCheck.detected) {
+    console.warn(`[intake] Prompt injection detected from ${clientId}:`, injectionCheck.patterns);
+    // Don't block — just sanitize and continue, but log it
+  }
+
   const currentStage = Math.max(1, Math.min(7, stage || 1));
   const instruction = STAGE_INSTRUCTIONS[currentStage];
   if (!instruction) {
     return NextResponse.json({ error: "invalid stage" }, { status: 400 });
+  }
+
+  // Track event: intake_started (only on first stage)
+  if (currentStage === 1) {
+    const existingCase = await db.case.findUnique({ where: { id: caseId } });
+    if (existingCase) {
+      await events.intakeStarted(existingCase.userId, caseId);
+    }
   }
 
   const userLangHint = /[\u0600-\u06FF]/.test(message) ? "ar" : "en";
@@ -138,6 +166,14 @@ export async function POST(req: NextRequest) {
     const distressDetected = !!parsed.distressDetected;
     const nextStage = readyForNext ? Math.min(7, currentStage + 1) : currentStage;
     const isComplete = readyForNext && currentStage >= 7;
+
+    // Track event: intake_completed
+    if (isComplete) {
+      const completionCase = await db.case.findUnique({ where: { id: caseId } });
+      if (completionCase) {
+        await events.intakeCompleted(completionCase.userId, caseId);
+      }
+    }
 
     // Persist the conversation turn into the case intake JSON
     const existingCase = await db.case.findUnique({ where: { id: caseId } });

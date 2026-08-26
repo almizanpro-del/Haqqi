@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getReviewerLawyer, safeJson } from "@/lib/api-helpers";
 import { audit } from "@/lib/audit";
 
+import { events } from "@/lib/events";
 interface ReviewRequest {
   draftId: string;
   action: "approve" | "reject";
@@ -54,8 +55,10 @@ export async function POST(req: NextRequest) {
 
   // C6: Canonical audit log
   if (action === "approve") {
+      await events.draftApproved(reviewer.id, draft.caseId ?? undefined, draftId);
     await audit.draftApproved(draftId, reviewer.id, draft.caseId ?? undefined);
   } else {
+      await events.draftRejected(reviewer.id, draft.caseId ?? undefined, draftId);
     await audit.draftRejected(draftId, reviewer.id, draft.caseId ?? undefined, comments);
   }
 

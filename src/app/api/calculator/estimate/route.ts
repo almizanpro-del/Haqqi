@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { safeJson, parseJsonField } from "@/lib/api-helpers";
 import type { LegalRulesConfig, CompensationCategory } from "@/lib/legal/seed";
+import { events } from "@/lib/events";
+import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
 interface CalculatorRequest {
   caseId: string;
@@ -25,8 +27,18 @@ export async function POST(req: NextRequest) {
   const { caseId } = (await req.json()) as CalculatorRequest;
   if (!caseId) return NextResponse.json({ error: "caseId required" }, { status: 400 });
 
+  // v3.2 §6.8: Rate limiting
+  const clientId = getClientIdentifier(req);
+  const rateLimit = checkRateLimit(clientId, "calculator_estimate");
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: "rate_limit_exceeded" }, { status: 429 });
+  }
+
   const caseRow = await db.case.findUnique({ where: { id: caseId } });
   if (!caseRow) return NextResponse.json({ error: "case not found" }, { status: 404 });
+
+  // Track event: calculator_started
+  await events.calculatorStarted(caseRow.userId, caseId);
 
   const rulesRow = await db.legalRulesConfig.findFirst({
     where: { isActive: true },
@@ -97,5 +109,8 @@ export async function POST(req: NextRequest) {
   );
 
   const result: CalculatorResult = { total, categories: applied, currency: "JOD", rulesVersion: rules.version };
+  // Track event: calculator_completed
+  await events.calculatorCompleted(caseRow.userId, caseId, result.total.min, result.total.max);
+
   return NextResponse.json(safeJson(result));
 }
