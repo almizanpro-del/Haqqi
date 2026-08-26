@@ -192,7 +192,7 @@ export function CourtView() {
                 </div>
                 {f.courtName && <div className="text-xs text-muted-foreground">{f.courtName}</div>}
                 <div className="text-[10px] text-muted-foreground numerals-ltr">
-                  {new Date(f.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                  {new Date(f.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                 </div>
               </div>
             ))

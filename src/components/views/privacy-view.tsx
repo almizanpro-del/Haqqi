@@ -126,7 +126,7 @@ export function PrivacyView() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Badge variant="outline" className="text-[10px]">v{c.version}</Badge>
-                    <span className="numerals-ltr">{new Date(c.acceptedAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                    <span className="numerals-ltr">{new Date(c.acceptedAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                   </div>
                 </div>
               ))}
@@ -184,7 +184,7 @@ export function PrivacyView() {
                   <div>
                     <span className="font-medium">{r.requestType}</span>
                     <span className="text-muted-foreground ms-2 numerals-ltr">
-                      {new Date(r.requestedAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(r.requestedAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </span>
                   </div>
                   <Badge

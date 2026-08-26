@@ -258,7 +258,7 @@ export function EngagementView() {
                       {statusBadge(l.status)}
                     </div>
                     <div className="text-[10px] text-muted-foreground">
-                      {l.lawyer?.name ?? "—"} · <span className="numerals-ltr">{new Date(l.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                      {l.lawyer?.name ?? "—"} · <span className="numerals-ltr">{new Date(l.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                     </div>
                   </button>
                 ))}

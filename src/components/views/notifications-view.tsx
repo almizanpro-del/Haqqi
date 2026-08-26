@@ -186,7 +186,7 @@ export function NotificationsView() {
                       <td className="p-2">{statusBadge(l.status)}</td>
                       <td className="p-2 numerals-ltr">{l.attempts}</td>
                       <td className="p-2 numerals-ltr text-muted-foreground">
-                        {l.sentAt ? new Date(l.sentAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO") : "—"}
+                        {l.sentAt ? new Date(l.sentAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO") : "—"}
                       </td>
                     </tr>
                   ))}

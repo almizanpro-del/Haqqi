@@ -95,7 +95,7 @@ export function CalculatorView() {
   }
 
   function formatJod(n: number) {
-    return new Intl.NumberFormat(lang === "ar" ? "ar-JO" : "en-JO", {
+    return new Intl.NumberFormat(lang === "ar" ? "ar-u-nu-latn" : "en-JO", {
       style: "currency",
       currency: "JOD",
       maximumFractionDigits: 0,

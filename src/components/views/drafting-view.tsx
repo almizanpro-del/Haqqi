@@ -336,7 +336,7 @@ export function DraftingView() {
                       {statusBadge(d.reviewStatus)}
                     </div>
                     <div className="text-[10px] text-muted-foreground numerals-ltr">
-                      v{d.version} · {new Date(d.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      v{d.version} · {new Date(d.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </div>
                   </button>
                 ))}
@@ -484,7 +484,7 @@ export function DraftingView() {
                               {log.action}
                             </Badge>
                             <span className="text-muted-foreground numerals-ltr">
-                              {new Date(log.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}
+                              {new Date(log.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                             </span>
                             {log.comments && <span className="text-muted-foreground">— {log.comments}</span>}
                           </div>

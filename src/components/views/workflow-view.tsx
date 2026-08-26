@@ -100,7 +100,7 @@ export function WorkflowView() {
   if (!timeline) return null;
 
   const accidentDate = new Date(timeline.accidentDate);
-  const formattedAccidentDate = new Intl.DateTimeFormat(lang === "ar" ? "ar-JO" : "en-JO", {
+  const formattedAccidentDate = new Intl.DateTimeFormat(lang === "ar" ? "ar-u-nu-latn" : "en-JO", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -167,7 +167,7 @@ export function WorkflowView() {
           {timeline.tasks.map((task) => {
             const label = lang === "ar" ? task.labelAr : task.labelEn;
             const due = new Date(task.dueDate);
-            const formattedDue = new Intl.DateTimeFormat(lang === "ar" ? "ar-JO" : "en-JO", {
+            const formattedDue = new Intl.DateTimeFormat(lang === "ar" ? "ar-u-nu-latn" : "en-JO", {
               month: "short",
               day: "numeric",
             }).format(due);

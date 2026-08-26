@@ -263,7 +263,7 @@ export function EvidenceView() {
                     {t(`ev.type.${e.type}` as never)}
                   </Badge>
                   <span className="text-[10px] text-muted-foreground numerals-ltr">
-                    {new Date(e.uploadedAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                    {new Date(e.uploadedAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                   </span>
                 </div>
               ))}
@@ -357,7 +357,7 @@ export function EvidenceView() {
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-xs font-medium">{l.contactPerson ?? "—"}</span>
                     <span className="text-[10px] text-muted-foreground numerals-ltr">
-                      {new Date(l.contactDate).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(l.contactDate).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-1">{l.summary}</p>

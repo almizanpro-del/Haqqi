@@ -331,7 +331,7 @@ export function LawyersView() {
                         <div className="flex items-center gap-1">
                           <span className="font-medium text-amber-500 numerals-ltr">★ {r.rating}</span>
                           <span className="text-muted-foreground">
-                            {new Date(r.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                            {new Date(r.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                           </span>
                         </div>
                         {r.comment && <p className="text-muted-foreground line-clamp-2">{r.comment}</p>}

@@ -104,7 +104,7 @@ export function generateDraftPDF(opts: {
   doc.setTextColor(100, 100, 100);
   let metaY = titleY + 20;
   const metaEntries: Array<[string, string]> = [
-    ["Generated", new Date().toLocaleString(language === "ar" ? "ar-JO" : "en-JO")],
+    ["Generated", new Date().toLocaleString(language === "ar" ? "ar-u-nu-latn" : "en-JO")],
     ...(caseId ? [["Case ID", caseId] as [string, string]] : []),
     ...(draftId ? [["Draft ID", draftId] as [string, string]] : []),
     ...Object.entries(metadata),

@@ -212,7 +212,7 @@ export function ForumView() {
                   <p className="text-xs text-muted-foreground line-clamp-2">{topic.body}</p>
                   <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
                     <span>{topic.authorDisplayName ?? "مجهول"}</span>
-                    <span className="numerals-ltr">{new Date(topic.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                    <span className="numerals-ltr">{new Date(topic.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                     <span className="flex items-center gap-1">
                       <Eye className="h-3 w-3" />
                       <span className="numerals-ltr">{topic.views}</span>
@@ -246,7 +246,7 @@ export function ForumView() {
                 <div className="rounded-lg border p-3 bg-muted/30">
                   <p className="text-sm whitespace-pre-wrap">{activeTopic.body}</p>
                   <div className="text-[10px] text-muted-foreground mt-2">
-                    {activeTopic.authorDisplayName ?? "مجهول"} · <span className="numerals-ltr">{new Date(activeTopic.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                    {activeTopic.authorDisplayName ?? "مجهول"} · <span className="numerals-ltr">{new Date(activeTopic.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                   </div>
                 </div>
 
@@ -261,7 +261,7 @@ export function ForumView() {
                       )}
                       <span className="text-xs font-medium">{post.authorDisplayName ?? "مجهول"}</span>
                       <span className="text-[10px] text-muted-foreground numerals-ltr">
-                        {new Date(post.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}
+                        {new Date(post.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                       </span>
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{post.body}</p>

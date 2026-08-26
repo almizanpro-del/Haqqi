@@ -122,7 +122,7 @@ export function InboxView() {
                     <div className="text-sm font-medium">{item.title}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">{item.body}</div>
                     <div className="text-[10px] text-muted-foreground mt-1 numerals-ltr">
-                      {new Date(item.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(item.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </div>
                   </div>
                   {!item.read && (

@@ -132,8 +132,8 @@ export function LegalContentView() {
                       {r.isActive && <Badge className="status-approved gap-1"><CheckCircle2 className="h-3 w-3" />{t("lc.active")}</Badge>}
                     </CardTitle>
                     <div className="text-xs text-muted-foreground mt-1 numerals-ltr">
-                      {new Date(r.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
-                      {r.approvedAt && ` · ${lang === "ar" ? "اعتُمد" : "approved"} ${new Date(r.approvedAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}`}
+                      {new Date(r.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
+                      {r.approvedAt && ` · ${lang === "ar" ? "اعتُمد" : "approved"} ${new Date(r.approvedAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}`}
                     </div>
                   </div>
                   {!r.isActive && (
@@ -158,7 +158,7 @@ export function LegalContentView() {
                     <CardTitle className="text-sm">{d.title}</CardTitle>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                       <code className="text-[10px] bg-muted px-1 py-0.5 rounded">{d.articleId ?? "—"}</code>
-                      <span className="numerals-ltr">{new Date(d.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                      <span className="numerals-ltr">{new Date(d.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                     </div>
                   </div>
                   {d.lawyerVerified ? (
@@ -199,7 +199,7 @@ export function LegalContentView() {
                       {tpl.isActive && <Badge className="status-approved gap-1"><CheckCircle2 className="h-3 w-3" />{t("lc.active")}</Badge>}
                     </CardTitle>
                     <div className="text-xs text-muted-foreground mt-1 numerals-ltr">
-                      {new Date(tpl.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(tpl.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </div>
                   </div>
                   {!tpl.isActive && (

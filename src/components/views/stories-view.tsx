@@ -162,7 +162,7 @@ export function StoriesView() {
                 <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
                   {s.accidentDate && (
                     <span className="numerals-ltr">
-                      {new Date(s.accidentDate).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(s.accidentDate).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </span>
                   )}
                   {s.insurerName && <Badge variant="outline" className="text-[10px]">{s.insurerName}</Badge>}

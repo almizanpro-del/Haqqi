@@ -128,7 +128,7 @@ export function DashboardView() {
   const Arrow = lang === "ar" ? ChevronLeft : ChevronRight;
   const accidentDate = data.case.accidentDate ? new Date(data.case.accidentDate) : null;
   const formattedAccidentDate = accidentDate
-    ? new Intl.DateTimeFormat(lang === "ar" ? "ar-JO" : "en-JO", { year: "numeric", month: "long", day: "numeric" }).format(accidentDate)
+    ? new Intl.DateTimeFormat(lang === "ar" ? "ar-u-nu-latn" : "en-JO", { year: "numeric", month: "long", day: "numeric" }).format(accidentDate)
     : "—";
 
   return (
@@ -342,7 +342,7 @@ export function DashboardView() {
               {data.claimLogs.slice(0, 5).map((log) => (
                 <div key={log.id} className="flex items-start gap-3 p-2 rounded border">
                   <div className="text-[10px] text-muted-foreground numerals-ltr shrink-0 mt-0.5">
-                    {new Date(log.contactDate).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                    {new Date(log.contactDate).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium">{log.contactPerson ?? "—"}</div>

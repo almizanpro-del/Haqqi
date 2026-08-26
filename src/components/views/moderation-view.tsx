@@ -182,7 +182,7 @@ export function ModerationView() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <p className="text-sm flex-1">{s.description}</p>
                     <span className="text-[10px] text-muted-foreground numerals-ltr shrink-0">
-                      {new Date(s.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(s.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </span>
                   </div>
                   {s.insurerName && <div className="text-xs text-muted-foreground mb-2">Insurer: {s.insurerName}</div>}
@@ -250,7 +250,7 @@ export function ModerationView() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <p className="text-sm flex-1">{r.description}</p>
                     <span className="text-[10px] text-muted-foreground numerals-ltr shrink-0">
-                      {new Date(r.createdAt).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-JO")}
+                      {new Date(r.createdAt).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                     </span>
                   </div>
                   {r.location && <div className="text-xs text-muted-foreground">Location: {r.location}</div>}

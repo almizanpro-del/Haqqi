@@ -264,7 +264,7 @@ export function ReviewQueueView() {
                       </CardTitle>
                       <div className="text-xs text-muted-foreground mt-1">
                         {d.case?.location ?? "—"} · {d.case?.accidentType ?? "—"} ·{" "}
-                        <span className="numerals-ltr">{new Date(d.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                        <span className="numerals-ltr">{new Date(d.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                       </div>
                     </div>
                     <Badge className="status-pending">{t("review.queue")}</Badge>
@@ -389,7 +389,7 @@ export function ReviewQueueView() {
                       </CardTitle>
                       <div className="text-xs text-muted-foreground mt-1">
                         <Clock className="h-3 w-3 inline me-1" />
-                        <span className="numerals-ltr">{new Date(r.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}</span>
+                        <span className="numerals-ltr">{new Date(r.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}</span>
                       </div>
                     </div>
                     <Button size="sm" onClick={() => activateRules(r.id)} className="bg-brand text-white hover:bg-brand/90 gap-1">
@@ -438,7 +438,7 @@ export function ReviewQueueView() {
                 )}
                 {a.comments && <span className="text-muted-foreground truncate">— {a.comments}</span>}
                 <span className="text-muted-foreground ms-auto numerals-ltr">
-                  {new Date(a.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}
+                  {new Date(a.createdAt).toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en-JO")}
                 </span>
               </div>
             ))
