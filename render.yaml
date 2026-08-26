@@ -1,0 +1,44 @@
+# Render Blueprint — Haqqi deployment
+# This file defines the infrastructure as code for Render.com
+
+databases:
+  - name: haqqi-db
+    databaseName: haqqi
+    user: haqqi
+    plan: free
+    region: frankfurt
+    ipAllowList: []
+
+services:
+  - type: web
+    name: haqqi
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    repo: https://github.com/almizanpro-del/Haqqi
+    buildCommand: npm install && npx tsx scripts/switch-db.ts && npx prisma generate && npm run build:standalone
+    startCommand: node .next/standalone/server.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: haqqi-db
+        property: connectionString
+      - key: DIRECT_URL
+        fromDatabase: haqqi-db
+        property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: ZAI_BASE_URL
+        value: "https://internal-api.z.ai/v1"
+      - key: ZAI_API_KEY
+        value: "Z.ai"
+      - key: ZAI_CHAT_ID
+        value: "chat-a4d7a313-0c94-451f-9a7a-2ebd5ef157e2"
+      - key: ZAI_TOKEN
+        sync: false
+      - key: ZAI_USER_ID
+        value: "cdb10f63-3683-404e-8019-14e5abf50aaf"

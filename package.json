@@ -12,12 +12,12 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "seed": "bun run scripts/seed.ts && bun run scripts/seed-forum.ts && bun run scripts/verify-all-docs.ts && bun run scripts/embed-documents.ts",
-    "seed:base": "bun run scripts/seed.ts",
-    "seed:forum": "bun run scripts/seed-forum.ts",
-    "seed:verify": "bun run scripts/verify-all-docs.ts",
-    "seed:embed": "bun run scripts/embed-documents.ts",
-    "postinstall": "bun run scripts/switch-db.ts && prisma generate"
+    "seed": "npx tsx scripts/seed.ts && npx tsx scripts/seed-forum.ts && npx tsx scripts/verify-all-docs.ts && npx tsx scripts/embed-documents.ts",
+    "seed:base": "npx tsx scripts/seed.ts",
+    "seed:forum": "npx tsx scripts/seed-forum.ts",
+    "seed:verify": "npx tsx scripts/verify-all-docs.ts",
+    "seed:embed": "npx tsx scripts/embed-documents.ts",
+    "postinstall": "npx tsx scripts/switch-db.ts && prisma generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -96,6 +96,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"
   }
