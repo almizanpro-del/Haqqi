@@ -16,8 +16,7 @@
     "seed:base": "npx tsx scripts/seed.ts",
     "seed:forum": "npx tsx scripts/seed-forum.ts",
     "seed:verify": "npx tsx scripts/verify-all-docs.ts",
-    "seed:embed": "npx tsx scripts/embed-documents.ts",
-    "postinstall": "npx tsx scripts/switch-db.ts; npx prisma generate"
+    "seed:embed": "npx tsx scripts/embed-documents.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
