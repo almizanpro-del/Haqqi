@@ -79,6 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { view: "calculator", labelKey: "nav.calculator", icon: Calculator, phase: 1 },
       { view: "evidence", labelKey: "nav.evidence", icon: FolderOpen, phase: 2 },
+      { view: "documents", labelKey: "nav.documents", icon: FileText },
       { view: "workflow", labelKey: "nav.workflow", icon: ListChecks, phase: 1 },
       { view: "court", labelKey: "nav.court", icon: Gavel, phase: 3 },
       { view: "engagement", labelKey: "nav.engagement", icon: ScrollText, phase: 3 },

@@ -34,6 +34,7 @@ export const translations = {
     "nav.settings": "الإعدادات",
     "nav.inbox": "صندوق الإشعارات",
     "nav.privacy": "الخصوصية والبيانات",
+    "nav.documents": "مكتبة المستندات",
 
     // Hero
     "hero.title": "افهم حقوقك. نظّم مطالبتك. لا تُخدع.",
@@ -356,6 +357,7 @@ export const translations = {
     "nav.settings": "Settings",
     "nav.inbox": "Notification Inbox",
     "nav.privacy": "Privacy & Data",
+    "nav.documents": "Document Library",
 
     // Hero
     "hero.title": "Know your rights. Organize your claim. Don't be exploited.",

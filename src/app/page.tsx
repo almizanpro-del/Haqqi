@@ -26,6 +26,7 @@ import { DashboardView } from "@/components/views/dashboard-view";
 import { SettingsView } from "@/components/views/settings-view";
 import { InboxView } from "@/components/views/inbox-view";
 import { PrivacyView } from "@/components/views/privacy-view";
+import { DocumentsView } from "@/components/views/documents-view";
 import { MobileBottomNav } from "@/components/haqqi/mobile-bottom-nav";
 import { OnboardingTour } from "@/components/haqqi/onboarding-tour";
 import { ConsentGate } from "@/components/haqqi/consent-gate";
@@ -60,6 +61,7 @@ export default function Home() {
         {view === "settings" && <SettingsView />}
         {view === "inbox" && <InboxView />}
         {view === "privacy" && <PrivacyView />}
+        {view === "documents" && <DocumentsView />}
       </main>
       <Footer />
       <MobileBottomNav />

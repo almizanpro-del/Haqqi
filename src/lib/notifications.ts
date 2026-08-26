@@ -48,6 +48,10 @@ export const NOTIFICATION_TEMPLATES: Record<string, { ar: string; en: string }> 
     ar: "تمت الموافقة على مشاركتك في المنتدى وهي الآن منشورة. — حقي",
     en: "Your forum post has been approved and is now published. — Haqqi",
   },
+  document_emailed: {
+    ar: "تم إرسال المستند '{{documentTitle}}' إلى بريدك الإلكتروني. — حقي",
+    en: "Your document '{{documentTitle}}' has been emailed. — Haqqi",
+  },
 };
 
 // The single internal interface (PRD §6.4 / §6.6)

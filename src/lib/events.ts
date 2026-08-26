@@ -17,6 +17,9 @@ export type EventType =
   | "draft_approved"
   | "draft_rejected"
   | "draft_sent"
+  | "document_exported"
+  | "document_emailed"
+  | "document_saved"
   | "escalation_initiated"
   | "handoff_created"
   | "case_access_granted"
@@ -151,4 +154,11 @@ export const events = {
     trackEvent({ event: "deadline_reminder_sent", userId, caseId, properties: { deadlineType } }),
   deadlineMissed: (userId: string, caseId: string, deadlineType: string) =>
     trackEvent({ event: "deadline_missed", userId, caseId, properties: { deadlineType } }),
+  // v3.3 §5.14 — Document Library events
+  documentExported: (userId: string | undefined, caseId: string | undefined, documentType: string, documentId: string, exportType: string) =>
+    trackEvent({ event: "document_exported", userId, caseId, properties: { documentType, entityId: documentId, exportType } }),
+  documentEmailed: (userId: string | undefined, caseId: string | undefined, documentType: string, documentId: string, recipient: string) =>
+    trackEvent({ event: "document_emailed", userId, caseId, properties: { documentType, entityId: documentId, recipient } }),
+  documentSaved: (userId: string | undefined, caseId: string | undefined, documentType: string, documentId: string) =>
+    trackEvent({ event: "document_saved", userId, caseId, properties: { documentType, entityId: documentId } }),
 };

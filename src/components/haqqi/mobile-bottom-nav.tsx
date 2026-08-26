@@ -37,6 +37,7 @@ const PRIMARY_NAV: MobileNavItem[] = [
 const ALL_VIEWS: View[] = [
   "workflow",
   "evidence",
+  "documents",
   "rag",
   "complaints",
   "lawyers",

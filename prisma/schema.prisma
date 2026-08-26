@@ -523,3 +523,15 @@ model GoldenTest {
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
 }
+
+// v3.3 §5.14 — Document Library: export log
+model DocumentExport {
+  id            String   @id @default(cuid())
+  documentType  String   // 'complaint' | 'draft' | 'engagement_letter'
+  documentId    String   // references complaints.id or drafts.id depending on documentType
+  userId        String?
+  caseId        String?
+  exportType    String   // 'pdf_download' | 'print' | 'email'
+  recipient     String?  // populated for 'email'
+  createdAt     DateTime @default(now())
+}
