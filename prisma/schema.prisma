@@ -1,13 +1,16 @@
-// Haqqi PRD v3.0 — Prisma schema (SQLite, MVP)
-// Mirrors the data model in PRD §6.2 (adapted: arrays/JSON stored as String)
+// Haqqi PRD v3.0 — Prisma schema (PostgreSQL / Supabase production)
+// Mirrors the data model in PRD §6.2 with native Postgres types
+// (arrays, JSONB, pgvector for RAG embeddings)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -29,7 +32,7 @@ model Case {
   id                  String      @id @default(cuid())
   userId              String
   user                User        @relation(fields: [userId], references: [id])
-  intakeJson          String      // JSON — output of AI intake (7 stages)
+  intakeJson          Json       // JSON — output of AI intake (7 stages)
   stage               Int         @default(0) // current intake stage (0..7)
   completed           Boolean     @default(false)
   accidentDate        DateTime?
@@ -111,7 +114,7 @@ model Draft {
   content             String
   plainArabicVersion  String?
   legalArabicVersion  String?
-  citations           String?   // JSON array of {source, article_id, topic, language}
+  citations           Json?      // JSON array of {source, article_id, topic, language}
   reviewStatus        String    @default("pending_review") // pending_review | approved | rejected | sent
   reviewedByLawyerId  String?
   reviewComments      String?
@@ -127,9 +130,9 @@ model Lawyer {
   name             String
   firm             String?
   location         String?
-  languages        String   // JSON array
+  languages        String[]  // Array
   feeModel         String?
-  expertise        String   // JSON array
+  expertise        String[]  // Array
   contactEmail     String?
   contactPhone     String?
   bio              String?
@@ -146,7 +149,7 @@ model Lawyer {
 model LegalRulesConfig {
   id                  String    @id @default(cuid())
   version             Int
-  rulesJson           String    // JSON: compensation categories, ranges, deadlines, doc checklists
+  rulesJson           Json      // JSON: compensation categories, ranges, deadlines, doc checklists
   isActive            Boolean   @default(false)
   approvedByLawyerId  String?
   approvedAt          DateTime?
@@ -170,13 +173,24 @@ model LegalDocument {
   content             String
   source              String?
   articleId           String?
-  topics              String    // JSON array
+  topics              String[]   // Array
   language            String    @default("ar")
   lawyerVerified      Boolean   @default(false)
   verifiedByLawyerId  String?
   verifiedAt          DateTime?
   createdAt           DateTime  @default(now())
+  // pgvector embedding (768-dim) — computed when document is verified
+  // Stored as Unsupported type since Prisma doesn't natively support pgvector yet
+  // We interact with it via raw SQL ($executeRaw, $queryRaw)
+  embedding           Unsupported("vector(768)")?
+
+  @@index([lawyerVerified])
+  @@index([articleId])
 }
+
+// Note: The pgvector extension and ivfflat index must be created via SQL migration:
+// CREATE EXTENSION IF NOT EXISTS vector;
+// CREATE INDEX ON "LegalDocument" USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
 model Story {
   id           String    @id @default(cuid())
@@ -193,7 +207,7 @@ model CorruptionReport {
   reportDate   DateTime @default(now())
   location     String?
   description  String
-  evidenceUrls String   // JSON array
+  evidenceUrls String[]  // Array
   isAnonymous  Boolean  @default(true)
   createdAt    DateTime @default(now())
 }
@@ -215,8 +229,8 @@ model HandoffPacket {
   case                Case     @relation(fields: [caseId], references: [id])
   lawyerId            String?
   lawyer              Lawyer?  @relation(fields: [lawyerId], references: [id])
-  includedDocumentIds String   // JSON
-  includedDraftIds    String   // JSON
+  includedDocumentIds String[]  // Array
+  includedDraftIds    String[]  // Array
   message             String?  // optional cover note from user to lawyer
   status              String   @default("sent") // sent | viewed | accepted | declined
   sentAt              DateTime @default(now())
@@ -255,7 +269,7 @@ model EngagementLetter {
   case         Case?     @relation(fields: [caseId], references: [id])
   templateType String    // contingency | hourly_fixed
   content      String
-  variablesJson String   // JSON of filled variables
+  variablesJson Json      // JSON of filled variables
   signedByUser Boolean    @default(false)
   signedByLawyer Boolean  @default(false)
   userSignedAt DateTime?
@@ -324,7 +338,7 @@ model NotificationLog {
   channel      String    // sms | whatsapp | email | in_app
   template     String    // e.g. "reminder_police_report", "draft_approved"
   recipient    String    // phone / email / user id
-  payload      String    // JSON of variables
+  payload      Json       // JSON of variables
   status       String    @default("queued") // queued | sent | delivered | failed
   providerMessageId String?
   attempts     Int       @default(0)
@@ -360,7 +374,7 @@ model LawyerVerification {
   licenseNumber   String?
   licenseFileUrl  String?   // uploaded scan of license (Supabase Storage in prod)
   lawFirmName     String?
-  practiceAreas   String?   // JSON array
+  practiceAreas   String[]?  // Array
   status          String    @default("pending") // pending | approved | rejected
   reviewedByAdminId String?
   reviewNotes     String?
@@ -377,7 +391,7 @@ model AuditLog {
   entityType  String   // case | draft | evidence | lawyer | legal_document | user | ...
   entityId    String?
   caseId      String?
-  metadata    String?  // JSON of action-specific context
+  metadata    Json?     // JSON of action-specific context
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime @default(now())

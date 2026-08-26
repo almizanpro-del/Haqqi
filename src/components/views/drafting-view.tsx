@@ -33,7 +33,7 @@ interface Draft {
   content: string;
   plainArabicVersion: string | null;
   legalArabicVersion: string | null;
-  citations: string | null;
+  citations: string | null | Array<Record<string, string>>;
   reviewStatus: ReviewStatus;
   reviewComments: string | null;
   reviewedAt: string | null;
@@ -214,7 +214,12 @@ export function DraftingView() {
 
   const citations = activeDraft?.citations
     ? (() => {
-        try { return JSON.parse(activeDraft.citations) as Array<Record<string, string>>; } catch { return []; }
+        const c = activeDraft.citations;
+        if (Array.isArray(c)) return c as Array<Record<string, string>>;
+        if (typeof c === "string") {
+          try { return JSON.parse(c) as Array<Record<string, string>>; } catch { return []; }
+        }
+        return [];
       })()
     : [];
 

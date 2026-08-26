@@ -1,10 +1,9 @@
 // POST /api/rag/search
-// Hybrid RAG retrieval (PRD §6.5, §9.3) — BM25 + topic boost + article-ID boost
+// Hybrid RAG retrieval (PRD §6.5, §9.3) — pgvector cosine similarity + BM25 fallback
 // Only searches lawyer_verified documents (PRD §6.5 verification gate)
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { hybridSearch, type RAGDocument } from "@/lib/rag/search";
-import { safeJson, parseJsonField } from "@/lib/api-helpers";
+import { hybridVectorSearch } from "@/lib/rag/vector-search";
+import { safeJson } from "@/lib/api-helpers";
 
 interface SearchRequest {
   query: string;
@@ -18,25 +17,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "query (min 2 chars) required" }, { status: 400 });
   }
 
-  // Only lawyer_verified documents are retrievable (PRD §6.5)
-  const verifiedDocs = await db.legalDocument.findMany({
-    where: { lawyerVerified: true },
-  });
-
-  const ragDocs: RAGDocument[] = verifiedDocs.map((d) => ({
-    id: d.id,
-    title: d.title,
-    content: d.content,
-    articleId: d.articleId,
-    topics: parseJsonField<string[]>(d.topics, []),
-    language: d.language,
-    lawyerVerified: d.lawyerVerified,
-  }));
-
-  const results = hybridSearch(ragDocs, query, limit);
+  const { results, usedVector } = await hybridVectorSearch(query, limit);
 
   // Confidence threshold — below this, the assistant should return the uncertainty fallback (PRD §6.5)
-  const CONFIDENCE_THRESHOLD = 0.5;
+  const CONFIDENCE_THRESHOLD = usedVector ? 0.3 : 0.5;
   const maxScore = results[0]?.score ?? 0;
   const belowThreshold = maxScore < CONFIDENCE_THRESHOLD;
 
@@ -47,6 +31,7 @@ export async function POST(req: NextRequest) {
     maxScore,
     confidenceThreshold: CONFIDENCE_THRESHOLD,
     belowThreshold,
+    searchMethod: usedVector ? "pgvector" : "bm25",
     fallbackMessage: belowThreshold
       ? "I'm not sure — here's how to reach a lawyer."
       : null,

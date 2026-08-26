@@ -43,23 +43,37 @@ Built per **PRD v3.0 — Technical / Development-Ready**.
 - Node.js 20+ (or Bun 1.3+)
 - A `.z-ai-config` file in your home directory or project root (for the LLM SDK)
 
-### Install & Run
+### Local Development (SQLite)
 
 ```bash
 # Install dependencies
-bun install   # or npm install
+bun install
 
-# Initialize the database
+# Initialize the database (SQLite for dev)
 bun run db:push
 
 # Seed initial legal content (lawyers, rules v1, templates, RAG corpus, stories)
-bun run scripts/seed.ts
+bun run seed
 
 # Start dev server
 bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Production Deployment (Supabase + Vercel)
+
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for the complete step-by-step guide.
+
+Quick summary:
+1. Create a Supabase project (Frankfurt region for best Jordan latency)
+2. Enable pgvector extension (SQL provided in `prisma/migrations/001_setup_pgvector.sql`)
+3. Connect the GitHub repo to Vercel
+4. Set environment variables (see `.env.example`)
+5. Run `bun run db:push && bun run seed` against Supabase
+6. Deploy on Vercel
+
+**Cost**: $0/month on free tiers for MVP.
 
 ### Demo Flow
 

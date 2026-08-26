@@ -26,7 +26,7 @@ export async function logAudit(event: AuditEvent): Promise<void> {
         entityType: event.entityType ?? null,
         entityId: event.entityId ?? null,
         caseId: event.caseId ?? null,
-        metadata: event.metadata ? JSON.stringify(event.metadata) : null,
+        metadata: event.metadata ?? null,
         ipAddress: event.ipAddress ?? null,
         userAgent: event.userAgent ?? null,
       },

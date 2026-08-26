@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       channel,
       template,
       recipient,
-      payload: JSON.stringify(payload),
+      payload: payload as any,
       status: "queued",
       scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
     },

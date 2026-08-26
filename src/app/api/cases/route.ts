@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   const newCase = await db.case.create({
     data: {
       userId: user.id,
-      intakeJson: JSON.stringify({ stages: {} }),
+      intakeJson: { stages: {} } as any,
       stage: 0,
       completed: false,
     },

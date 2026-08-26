@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
       // Audit the LLM call (with redaction count for PDPL trail)
       await audit.llmCall("intake", existingCase.userId, redaction.found.length, caseId);
       const intake = existingCase.intakeJson
-        ? JSON.parse(existingCase.intakeJson)
+        ? existingCase.intakeJson as { stages: Record<string, Record<string, unknown>> }
         : { stages: {} };
 
       if (!intake.stages) intake.stages = {};
@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
       }
 
       const updateData: Record<string, unknown> = {
-        intakeJson: JSON.stringify(intake),
+        intakeJson: intake as any,
         stage: isComplete ? 7 : nextStage,
         completed: isComplete,
       };
