@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build",
     "build:standalone": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
-    "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+    "start": "next start",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",
     "db:generate": "prisma generate",
@@ -17,7 +17,7 @@
     "seed:forum": "npx tsx scripts/seed-forum.ts",
     "seed:verify": "npx tsx scripts/verify-all-docs.ts",
     "seed:embed": "npx tsx scripts/embed-documents.ts",
-    "postinstall": "npx tsx scripts/switch-db.ts && prisma generate"
+    "postinstall": "npx tsx scripts/switch-db.ts; npx prisma generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -86,7 +86,8 @@
     "vaul": "^1.1.2",
     "z-ai-web-dev-sdk": "^0.0.18",
     "zod": "^4.0.2",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.6",
+    "tsx": "^4.23.12"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -96,7 +97,6 @@
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
     "tailwindcss": "^4",
-    "tsx": "^4.23.12",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"
   }
