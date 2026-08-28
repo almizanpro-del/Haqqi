@@ -34,11 +34,14 @@ import { ConsentGate } from "@/components/haqqi/consent-gate";
 export default function Home() {
   const view = useAppStore((s) => s.view);
 
+  if (view === "home") {
+    return <HomeView />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 pb-24 lg:pb-8">
-        {view === "home" && <HomeView />}
         {view === "dashboard" && <DashboardView />}
         {view === "intake" && <IntakeView />}
         {view === "calculator" && <CalculatorView />}
