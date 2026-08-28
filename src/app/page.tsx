@@ -35,7 +35,13 @@ export default function Home() {
   const view = useAppStore((s) => s.view);
 
   if (view === "home") {
-    return <HomeView />;
+    return (
+      <>
+        <HomeView />
+        <OnboardingTour />
+        <ConsentGate />
+      </>
+    );
   }
 
   return (
