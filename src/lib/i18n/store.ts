@@ -55,6 +55,8 @@ function applyDocumentDir(lang: Lang) {
   html.dir = lang === "ar" ? "rtl" : "ltr";
 }
 
+type PersistedAppState = Pick<AppState, "lang" | "role" | "activeCaseId" | "activeDraftId">;
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -81,6 +83,22 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "haqqi-app-state",
+      version: 1,
+      partialize: (state): PersistedAppState => ({
+        lang: state.lang,
+        role: state.role,
+        activeCaseId: state.activeCaseId,
+        activeDraftId: state.activeDraftId,
+      }),
+      migrate: (persistedState) => {
+        const state = (persistedState ?? {}) as Partial<PersistedAppState>;
+        return {
+          lang: state.lang ?? "ar",
+          role: state.role ?? "victim",
+          activeCaseId: state.activeCaseId ?? null,
+          activeDraftId: state.activeDraftId ?? null,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         if (state) applyDocumentDir(state.lang);
       },
