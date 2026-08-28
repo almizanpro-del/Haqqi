@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/i18n/store";
 import { Header } from "@/components/haqqi/header";
 import { Footer } from "@/components/haqqi/footer";
@@ -29,13 +30,26 @@ import { PrivacyView } from "@/components/views/privacy-view";
 import { DocumentsView } from "@/components/views/documents-view";
 import { MobileBottomNav } from "@/components/haqqi/mobile-bottom-nav";
 import { OnboardingTour } from "@/components/haqqi/onboarding-tour";
-import { ConsentGate } from "@/components/haqqi/consent-gate";
+import { CONSENTS_KEY, ConsentGate } from "@/components/haqqi/consent-gate";
 
 export default function Home() {
   const view = useAppStore((s) => s.view);
+  const [marketingConsentsAccepted, setMarketingConsentsAccepted] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setMarketingConsentsAccepted(Boolean(localStorage.getItem(CONSENTS_KEY)));
+    }
+  }, []);
 
   if (view === "home") {
-    return <HomeView />;
+    return (
+      <>
+        <HomeView />
+        <ConsentGate onAccepted={() => setMarketingConsentsAccepted(true)} />
+        <OnboardingTour enabled={marketingConsentsAccepted} />
+      </>
+    );
   }
 
   return (

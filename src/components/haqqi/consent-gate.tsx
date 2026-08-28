@@ -72,9 +72,13 @@ const CONSENTS = [
   },
 ];
 
-const CONSENTS_KEY = "haqqi-consents-accepted-v1";
+export const CONSENTS_KEY = "haqqi-consents-accepted-v1";
 
-export function ConsentGate() {
+interface ConsentGateProps {
+  onAccepted?: () => void;
+}
+
+export function ConsentGate({ onAccepted }: ConsentGateProps = {}) {
   const lang = useAppStore((s) => s.lang);
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -103,6 +107,7 @@ export function ConsentGate() {
       }
       localStorage.setItem(CONSENTS_KEY, new Date().toISOString());
       setOpen(false);
+      onAccepted?.();
       toast({
         title: lang === "ar" ? "تم قبول الموافقات" : "Consents accepted",
         description: lang === "ar" ? "يمكنك الآن استخدام المنصة بالكامل." : "You can now fully use the platform.",
@@ -121,7 +126,14 @@ export function ConsentGate() {
   const Arrow = lang === "ar" ? ChevronLeft : ChevronRight;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !submitting && setOpen(v)}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!submitting && !v) {
+          setOpen(false);
+        }
+      }}
+    >
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
         {/* Compact header with brand gradient */}
         <div className="haqqi-gradient px-5 py-4 text-white">

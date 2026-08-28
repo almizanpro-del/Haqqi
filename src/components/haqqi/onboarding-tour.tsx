@@ -90,7 +90,11 @@ const STEPS: Step[] = [
   },
 ];
 
-export function OnboardingTour() {
+interface OnboardingTourProps {
+  enabled?: boolean;
+}
+
+export function OnboardingTour({ enabled = true }: OnboardingTourProps = {}) {
   const t = useAppStore((s) => s.t);
   const lang = useAppStore((s) => s.lang);
   const setView = useAppStore((s) => s.setView);
@@ -98,14 +102,14 @@ export function OnboardingTour() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
     const completed = localStorage.getItem(ONBOARDING_KEY);
     if (!completed) {
       // Small delay so the page loads first
       const timer = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [enabled]);
 
   function handleClose() {
     setOpen(false);
